@@ -1,14 +1,23 @@
 'use client';
 
 import WordCloud from './WordCloud';
+import CountUp from './CountUp';
+import Typewriter from './Typewriter';
 import type { AggregationResult } from '@/lib/types';
 
-// 集約結果の表示（REMOTE-2/REMOTE-4 で共通利用・scope非依存）
+// 集約結果の表示（REMOTE-2/4・ONSITE-2/3・最終結果で共通利用・scope非依存）
 export default function AggregationView({ result }: { result: AggregationResult }) {
   return (
     <>
+      <div className="stat-strip">
+        <Stat n={result.commonStumbles?.length ?? 0} label="つまずき" />
+        <Stat n={result.hacks?.length ?? 0} label="ハック" />
+        <Stat n={result.currentTroubles?.length ?? 0} label="困りごと" />
+        <Stat n={result.wordCloud?.length ?? 0} label="キーワード" />
+      </div>
+
       {result.wordCloud?.length > 0 && (
-        <div className="card" style={{ marginTop: 24, padding: 20 }}>
+        <div className="card" style={{ marginTop: 18, padding: 20 }}>
           <WordCloud words={result.wordCloud} />
         </div>
       )}
@@ -28,6 +37,15 @@ export default function AggregationView({ result }: { result: AggregationResult 
   );
 }
 
+function Stat({ n, label }: { n: number; label: string }) {
+  return (
+    <div className="stat">
+      <div className="stat-n"><CountUp value={n} /></div>
+      <div className="stat-l">{label}</div>
+    </div>
+  );
+}
+
 function ListCard({ title, items }: { title: string; items: { t: string; n?: number; ev: string[] }[] }) {
   return (
     <div className="card">
@@ -36,7 +54,7 @@ function ListCard({ title, items }: { title: string; items: { t: string; n?: num
         {items.length === 0 && <li className="muted tiny">—</li>}
         {items.map((it, i) => (
           <li key={i}>
-            <div className="il-t">{it.t}{it.n != null && <span className="il-n">{it.n}</span>}</div>
+            <div className="il-t">{it.t}{it.n != null && <span className="il-n"><CountUp value={it.n} /></span>}</div>
             {it.ev?.[0] && <div className="il-ev">“{it.ev[0]}”</div>}
           </li>
         ))}
@@ -53,7 +71,7 @@ function AgentCard({ who, label, reads }: { who: 'spark' | 'minta'; label: strin
         {reads.length === 0 && <li className="muted tiny">—</li>}
         {reads.map((r, i) => (
           <li key={i}>
-            <div className="il-t">{r.read}</div>
+            <div className="il-t" style={{ fontWeight: 500 }}><Typewriter text={r.read} delay={i * 700} /></div>
             {r.evidence?.[0] && <div className="il-ev">“{r.evidence[0]}”</div>}
           </li>
         ))}
