@@ -5,14 +5,17 @@ import Typewriter from './Typewriter';
 import type { AggregationResult, AgentInterpretation } from '@/lib/types';
 
 // spark/minta 会話モジュール：「話す」→ くるくる → 読み解き → Q&A（1往復・AI返信）
-export default function AgentConversation({ result }: { result: AggregationResult }) {
-  const [phase, setPhase] = useState<'cta' | 'analyzing' | 'revealed'>('cta');
+export default function AgentConversation({ result, autoStart = false }: { result: AggregationResult; autoStart?: boolean }) {
+  const [phase, setPhase] = useState<'cta' | 'analyzing' | 'revealed'>(autoStart ? 'analyzing' : 'cta');
   const context = result.trendSummary || '';
 
-  const start = () => {
-    setPhase('analyzing');
-    setTimeout(() => setPhase('revealed'), 2600);
-  };
+  useEffect(() => {
+    if (phase !== 'analyzing') return;
+    const t = setTimeout(() => setPhase('revealed'), 2600);
+    return () => clearTimeout(t);
+  }, [phase]);
+
+  const start = () => setPhase('analyzing');
 
   if (phase === 'cta') {
     return (

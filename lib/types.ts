@@ -16,6 +16,7 @@ export interface AggregationResult {
     spark: AgentInterpretation;
     minta: AgentInterpretation;
   };
+  members: { name: string; summary: string }[]; // チーム集約時：各メンバーの持ち寄り（transcriptから抽出）。他scopeは空配列
 }
 
 export interface AgentInterpretation {

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import AggregationView from '@/components/AggregationView';
+import HeroType from '@/components/HeroType';
 import type { AggregationResult } from '@/lib/types';
 
 type Team = { id: string; name: string; members: string[] };
@@ -41,8 +42,8 @@ export default function OnsiteLive() {
       <div className="screen">
         <div className="screen-head">
           <div>
-            <span className="eyebrow">ONSITE-3 · 全体集計</span>
-            <h1 style={{ fontSize: 34, marginTop: 6 }}>会場の声を、ひとつに</h1>
+            <span className="eyebrow">spark &amp; minta が分析中</span>
+            <h1 style={{ fontSize: 32, marginTop: 6 }}><HeroType /></h1>
           </div>
           <button className="btn btn-primary btn-lg" onClick={run} disabled={busy}>
             {busy ? '集約中…' : '全体集約を実行'}
