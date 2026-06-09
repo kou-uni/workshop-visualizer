@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 import { useEffect, useRef, useState } from 'react';
 
 const MIC = (
@@ -45,7 +46,7 @@ export default function RemoteInput() {
       <div className="device-body">
         <header className="app-head">
           <div className="app-head-left">
-            <Link href="/" className="logo-dot">8</Link>
+            <BackButton /><Link href="/" className="logo-dot">8</Link>
             <span className="app-head-title">第7回振り返り（個人作業）</span>
             <span className="badge badge-gray" style={{ fontSize: 10, padding: '3px 8px' }}>REMOTE-1</span>
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
@@ -111,7 +112,7 @@ export default function OnsiteRecord() {
       <div className="device-body">
         <header className="app-head">
           <div className="app-head-left">
-            <Link href="/" className="logo-dot">8</Link>
+            <BackButton /><Link href="/" className="logo-dot">8</Link>
             <span className="app-head-title">リアル振り返り</span>
             <span className="badge badge-gray" style={{ fontSize: 10, padding: '3px 8px' }}>ONSITE-1</span>
           </div>

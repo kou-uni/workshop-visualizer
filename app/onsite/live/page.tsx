@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 import { useEffect, useState } from 'react';
 import AggregationView from '@/components/AggregationView';
 import HeroType from '@/components/HeroType';
@@ -34,7 +35,7 @@ export default function OnsiteLive() {
   return (
     <>
       <div className="topbar">
-        <Link href="/" className="logo-dot">8</Link>
+        <BackButton /><Link href="/" className="logo-dot">8</Link>
         <span className="title">リアル全体集計</span>
         <span className="spacer" />
       </div>

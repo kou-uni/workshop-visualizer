@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 import { useEffect, useState } from 'react';
 import AggregationView from '@/components/AggregationView';
 import type { AggregationResult } from '@/lib/types';
@@ -31,7 +32,7 @@ export default function RemoteAdmin() {
   return (
     <>
       <div className="topbar">
-        <Link href="/" className="logo-dot">8</Link>
+        <BackButton /><Link href="/" className="logo-dot">8</Link>
         <span className="title">オンライン集約</span>
         <span className="spacer" />
       </div>

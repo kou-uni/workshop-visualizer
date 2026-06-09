@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import BackButton from '@/components/BackButton';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import AgentConversation from '@/components/AgentConversation';
@@ -46,7 +47,7 @@ export default function TeamResult() {
       <div className="device-body">
         <header className="app-head">
           <div className="app-head-left">
-            <Link href="/" className="logo-dot">8</Link>
+            <BackButton /><Link href="/" className="logo-dot">8</Link>
             <span className="app-head-title">チームの振り返り</span>
             <span className="badge badge-gray" style={{ fontSize: 10, padding: '3px 8px' }}>ONSITE-2</span>
           </div>
