@@ -37,18 +37,18 @@ export async function aggregate(scope: Scope, sessionId: string): Promise<Aggreg
   const sb = supabaseAdmin();
   const scopeKind = scope.kind;
   const teamId = scope.kind === 'team' ? scope.teamId : null;
-  const inputs: string[] = [];
+  let inputs: string[] = [];
 
   if (scope.kind === 'online') {
-    const { data: refs } = await sb.from('reflections')
-      .select('discord_name,pr,stumble,hack,trouble').eq('session_id', sessionId);
-    const { data: ins } = await sb.from('insights').select('body').eq('session_id', sessionId);
-    for (const r of refs ?? []) {
-      inputs.push(`【${r.discord_name}】PR:${r.pr ?? ''} / つまずき:${r.stumble ?? ''} / ハック:${r.hack ?? ''} / 困りごと:${r.trouble ?? ''}`);
-    }
-    for (const i of ins ?? []) inputs.push(`気づき:${i.body}`);
+    inputs = await onlineInputs(sb, sessionId);
+  } else if (scope.kind === 'team') {
+    inputs = await teamInputs(sb, scope.teamId);
+  } else if (scope.kind === 'real') {
+    inputs = await realInputs(sb, sessionId);
+  } else if (scope.kind === 'merged') {
+    inputs = [...(await onlineInputs(sb, sessionId)), ...(await realInputs(sb, sessionId))];
   } else {
-    throw new Error(`scope '${scope.kind}' は未実装（M2/M3で対応）`);
+    throw new Error(`scope '${(scope as any).kind}' は未実装`);
   }
 
   if (inputs.length === 0) inputs.push('（まだ入力がありません）');
@@ -73,4 +73,34 @@ export async function aggregate(scope: Scope, sessionId: string): Promise<Aggreg
   });
 
   return result;
+}
+
+// ---- scope別の入力収集 ----
+async function onlineInputs(sb: ReturnType<typeof supabaseAdmin>, sessionId: string): Promise<string[]> {
+  const out: string[] = [];
+  const { data: refs } = await sb.from('reflections').select('discord_name,pr,stumble,hack,trouble').eq('session_id', sessionId);
+  const { data: ins } = await sb.from('insights').select('body').eq('session_id', sessionId);
+  for (const r of refs ?? []) out.push(`【${r.discord_name}】PR:${r.pr ?? ''} / つまずき:${r.stumble ?? ''} / ハック:${r.hack ?? ''} / 困りごと:${r.trouble ?? ''}`);
+  for (const i of ins ?? []) out.push(`気づき:${i.body}`);
+  return out;
+}
+
+async function teamInputs(sb: ReturnType<typeof supabaseAdmin>, teamId: string): Promise<string[]> {
+  const out: string[] = [];
+  const { data: team } = await sb.from('teams').select('name,members').eq('id', teamId).maybeSingle();
+  if (team) out.push(`【チーム:${team.name}】メンバー:${(team.members ?? []).join('、')}`);
+  const { data: recs } = await sb.from('recordings').select('transcript').eq('team_id', teamId);
+  for (const r of recs ?? []) if (r.transcript?.trim()) out.push(`議論の記録:${r.transcript}`);
+  return out;
+}
+
+async function realInputs(sb: ReturnType<typeof supabaseAdmin>, sessionId: string): Promise<string[]> {
+  const out: string[] = [];
+  const { data: teams } = await sb.from('teams').select('id,name').eq('session_id', sessionId);
+  for (const t of teams ?? []) {
+    const { data: recs } = await sb.from('recordings').select('transcript').eq('team_id', t.id);
+    const txt = (recs ?? []).map((r) => r.transcript).filter((x) => x && x.trim()).join(' ');
+    if (txt.trim()) out.push(`【${t.name}】${txt}`);
+  }
+  return out;
 }
