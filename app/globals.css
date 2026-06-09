@@ -230,3 +230,15 @@ h2 { font-size:20px; font-weight:600; letter-spacing:-.02em; line-height:1.3; }
 .type-caret { display:inline-block; width:2px; height:1em; background:var(--fg); margin-left:2px; vertical-align:-2px; animation:caretBlink .9s step-end infinite; }
 .agent-minta .type-caret { background:var(--minta); }
 @keyframes caretBlink { 50% { opacity:0; } }
+
+/* ============ agent talk（くるくる→読み解き→問いかけ）============ */
+.agent-analyzing { display:flex; align-items:center; gap:10px; color:var(--fg-2); font-size:13.5px; padding:8px 0 4px; }
+.agent-spin { width:16px; height:16px; flex:none; border-radius:50%; border:2px solid var(--border-strong); border-top-color:var(--fg); animation:spin .7s linear infinite; }
+.agent-minta .agent-spin { border-top-color:var(--minta); }
+.talk-bubble { display:flex; align-items:flex-start; gap:8px; margin-top:15px; padding:13px 16px; border-radius:14px 14px 14px 4px;
+  font-size:13.5px; font-weight:600; line-height:1.55; animation:bubbleIn .32s cubic-bezier(.2,.8,.25,1) both; }
+.talk-icon { flex:none; }
+.talk-spark { background:var(--gray-100); border:1px solid var(--border); color:var(--fg); }
+.talk-minta { background:#fff0f7; border:1px solid #ffd0e6; color:#a01060; }
+.talk-minta .type-caret { background:var(--minta); }
+@keyframes bubbleIn { from { opacity:0; transform:translateY(7px) scale(.97);} to { opacity:1; transform:none;} }

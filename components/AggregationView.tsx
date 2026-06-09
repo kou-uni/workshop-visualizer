@@ -2,7 +2,7 @@
 
 import WordCloud from './WordCloud';
 import CountUp from './CountUp';
-import Typewriter from './Typewriter';
+import AgentTalk from './AgentTalk';
 import type { AggregationResult } from '@/lib/types';
 
 // 集約結果の表示（REMOTE-2/4・ONSITE-2/3・最終結果で共通利用・scope非依存）
@@ -30,8 +30,8 @@ export default function AggregationView({ result }: { result: AggregationResult 
       </div>
 
       <div className="grid-2" style={{ marginTop: 24 }}>
-        <AgentCard who="spark" label="spark-agent ・ 技術/アーキ視点" reads={result.interpretations.spark} />
-        <AgentCard who="minta" label="minta-agent ・ 要件/価値/UX視点" reads={result.interpretations.minta} />
+        <AgentTalk who="spark" label="spark-agent ・ 技術/アーキ視点" data={result.interpretations.spark} />
+        <AgentTalk who="minta" label="minta-agent ・ 要件/価値/UX視点" data={result.interpretations.minta} />
       </div>
     </>
   );
@@ -56,23 +56,6 @@ function ListCard({ title, items }: { title: string; items: { t: string; n?: num
           <li key={i}>
             <div className="il-t">{it.t}{it.n != null && <span className="il-n"><CountUp value={it.n} /></span>}</div>
             {it.ev?.[0] && <div className="il-ev">“{it.ev[0]}”</div>}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function AgentCard({ who, label, reads }: { who: 'spark' | 'minta'; label: string; reads: { read: string; evidence: string[] }[] }) {
-  return (
-    <div className={`agent agent-${who}`}>
-      <div className="agent-head"><span className="agent-dot" />{label}</div>
-      <ul className="ilist">
-        {reads.length === 0 && <li className="muted tiny">—</li>}
-        {reads.map((r, i) => (
-          <li key={i}>
-            <div className="il-t" style={{ fontWeight: 500 }}><Typewriter text={r.read} delay={i * 700} /></div>
-            {r.evidence?.[0] && <div className="il-ev">“{r.evidence[0]}”</div>}
           </li>
         ))}
       </ul>

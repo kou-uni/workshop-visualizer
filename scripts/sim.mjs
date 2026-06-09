@@ -52,8 +52,10 @@ function show(title, r) {
   line('● 困りごと: ' + (r.currentTroubles || []).map(x => `${x.title}(${x.count})`).join(' / '));
   line('● 傾向: ' + (r.trendSummary || ''));
   line('● 雲(' + (r.wordCloud || []).length + '): ' + (r.wordCloud || []).map(w => `${w.keyword}·${w.weight}`).join('  '));
-  line('● spark: ' + (r.interpretations?.spark || []).map(x => x.read).join(' ／ '));
-  line('● minta: ' + (r.interpretations?.minta || []).map(x => x.read).join(' ／ '));
+  line('● spark: ' + (r.interpretations?.spark?.reads || []).map(x => x.read).join(' ／ '));
+  line('   └ 問いかけ: ' + (r.interpretations?.spark?.question || ''));
+  line('● minta: ' + (r.interpretations?.minta?.reads || []).map(x => x.read).join(' ／ '));
+  line('   └ 問いかけ: ' + (r.interpretations?.minta?.question || ''));
 }
 
 // ---- 投入 ----
@@ -95,7 +97,7 @@ QC('オンライン集約：つまずき非空', (online.commonStumbles || []).l
 QC('オンライン集約：件数が人数以下（捏造でない）', (online.commonStumbles || []).every(s => s.count <= REFLECTIONS.length), `max count=${Math.max(...(online.commonStumbles || [{ count: 0 }]).map(s => s.count))} / 人数${REFLECTIONS.length}`);
 QC('オンライン雲：10語以上', (online.wordCloud || []).length >= 10, `${(online.wordCloud || []).length}語`);
 QC('オンライン雲：入力との関連性が高い', ro.pct >= 55, `${ro.pct}%が入力語（${ro.hit}/${ro.total}）` + (ro.miss.length ? ` 抽象語例: ${ro.miss.slice(0, 4).join(',')}` : ''));
-QC('解釈：spark/minta とも非空＋根拠あり', (online.interpretations?.spark || []).length > 0 && (online.interpretations?.minta || []).length > 0 && (online.interpretations.spark[0].evidence || []).length > 0);
+QC('解釈：spark/minta とも複数点＋根拠＋問いかけ', (online.interpretations?.spark?.reads || []).length >= 2 && (online.interpretations?.minta?.reads || []).length >= 2 && (online.interpretations.spark.reads[0].evidence || []).length > 0 && !!online.interpretations.spark.question && !!online.interpretations.minta.question);
 QC('チーム集約：その卓の議論を反映', JSON.stringify(team2).includes('話者') || JSON.stringify(team2).includes('チャンク') || JSON.stringify(team2).toLowerCase().includes('stt') || JSON.stringify(team2).includes('コスト'));
 QC('統合：オンライン語(環境変数/通知)とリアル語(testnet/ガス/監査)の両方を含む', /環境変数|通知|デプロイ|rls|セキュリティ/i.test(JSON.stringify(merged)) && /testnet|ガス|監査|nft|dao/i.test(JSON.stringify(merged)));
 QC('統合雲：関連性が高い', rm.pct >= 55, `${rm.pct}%（${rm.hit}/${rm.total}）`);

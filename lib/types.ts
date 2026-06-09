@@ -13,9 +13,14 @@ export interface AggregationResult {
   trendSummary: string;
   wordCloud: { keyword: string; weight: number }[]; // weight 1..5
   interpretations: {
-    spark: { read: string; evidence: string[] }[];
-    minta: { read: string; evidence: string[] }[];
+    spark: AgentInterpretation;
+    minta: AgentInterpretation;
   };
+}
+
+export interface AgentInterpretation {
+  reads: { read: string; evidence: string[] }[];
+  question: string; // 聴衆への問いかけ（〜?）
 }
 
 export type RecordingStatus = 'recording' | 'transcribing' | 'aggregated' | 'failed';
