@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseClient';
 import { ensureSession } from '@/lib/session';
+import { todayJST } from '@/lib/date';
 
 // 個人振り返りの提出（サーバ→secretキーで保存＝RLSバイパス）
 export async function POST(req: Request) {
@@ -13,8 +14,7 @@ export async function POST(req: Request) {
   }
 
   const sb = supabaseAdmin();
-  const today = new Date().toISOString().slice(0, 10);
-  const sessionId = await ensureSession(sb, today);
+  const sessionId = await ensureSession(sb, todayJST());
 
   const { data, error } = await sb
     .from('reflections')

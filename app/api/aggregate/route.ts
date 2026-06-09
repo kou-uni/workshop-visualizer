@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseClient';
 import { aggregate } from '@/lib/aggregate';
 import { ensureSession } from '@/lib/session';
+import { todayJST } from '@/lib/date';
 import type { Scope } from '@/lib/types';
 
 export const maxDuration = 60; // OpenAI 集約のため長めに
@@ -11,8 +12,7 @@ export async function POST(req: Request) {
   const kind = (body.scope ?? 'online') as Scope['kind'];
 
   const sb = supabaseAdmin();
-  const today = new Date().toISOString().slice(0, 10);
-  const sessionId = await ensureSession(sb, today);
+  const sessionId = await ensureSession(sb, todayJST());
 
   const scope: Scope = kind === 'team' ? { kind: 'team', teamId: body.teamId } : { kind };
 
