@@ -35,7 +35,19 @@ export default function WordCloud({ words }: { words: Word[] }) {
     let sim: any;
 
     (async () => {
-      try { await (document as any).fonts?.load?.('500 40px Fraunces'); await (document as any).fonts?.ready; } catch {}
+      try {
+        const f = (document as any).fonts;
+        if (f?.load) {
+          await Promise.all([
+            f.load('500 40px Fraunces'),
+            f.load('400 60px "Mochiy Pop One"'),
+            f.load('700 40px "Zen Maru Gothic"'),
+            f.load('600 24px Geist'),
+            f.load('500 16px "Geist Mono"'),
+          ]).catch(() => {});
+        }
+        await f?.ready;
+      } catch {}
       if (stopped || !el) return;
       const W = Math.max(el.clientWidth, 320);
       const H = Math.round(Math.max(340, Math.min(600, W * 0.62)));
