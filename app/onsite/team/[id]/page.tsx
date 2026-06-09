@@ -38,7 +38,7 @@ export default function TeamResult() {
         <span className="spacer" />
       </div>
 
-      <div className="screen-wide">
+      <div className="screen">
         <div className="screen-head">
           <div>
             <span className="eyebrow">ONSITE-2 · チーム結果</span>

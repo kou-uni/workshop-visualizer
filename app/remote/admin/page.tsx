@@ -36,7 +36,7 @@ export default function RemoteAdmin() {
         <span className="spacer" />
       </div>
 
-      <div className="screen-wide">
+      <div className="screen">
         <div className="screen-head">
           <div>
             <span className="eyebrow">REMOTE-4 · オンライン集約</span>

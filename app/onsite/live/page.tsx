@@ -38,7 +38,7 @@ export default function OnsiteLive() {
         <span className="spacer" />
       </div>
 
-      <div className="screen-wide">
+      <div className="screen">
         <div className="screen-head">
           <div>
             <span className="eyebrow">ONSITE-3 · 全体集計</span>
@@ -62,9 +62,9 @@ export default function OnsiteLive() {
         ) : (
           <div className="grid-teams">
             {teams.map((t) => (
-              <Link key={t.id} href={`/onsite/team/${t.id}`} className="team-tile">
-                <div className="tt-name">{t.name}</div>
-                <div className="tt-members">{t.members?.length ? `${t.members.length}名` : '—'}</div>
+              <Link key={t.id} href={`/onsite/team/${t.id}`} className="team-chip">
+                <div className="tn">{t.name}</div>
+                <div className="ts"><span className="dotg" />{t.members?.length ? `${t.members.length}名` : '—'}</div>
               </Link>
             ))}
           </div>

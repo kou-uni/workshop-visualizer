@@ -33,7 +33,7 @@ export default function FinalResult() {
         <span className="spacer" />
       </div>
 
-      <div className="screen-wide">
+      <div className="screen">
         <div className="screen-head">
           <div>
             <span className="eyebrow">ALL · リアル＆オンライン統合</span>

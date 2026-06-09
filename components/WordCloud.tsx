@@ -40,6 +40,7 @@ export default function WordCloud({ words }: { words: Word[] }) {
       const W = Math.max(el.clientWidth, 320);
       const H = Math.round(Math.max(340, Math.min(600, W * 0.62)));
       el.style.height = H + 'px';
+      el.style.minHeight = H + 'px';
       const SIZE: Record<number, number> = { 5: Math.min(96, W / 10.5), 4: W / 18, 3: W / 30, 2: W / 48, 1: W / 74 };
 
       el.innerHTML = '';
@@ -93,11 +94,14 @@ export default function WordCloud({ words }: { words: Word[] }) {
         enter.append('text').attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
           .attr('font-family', (d: any) => d.font).attr('font-weight', (d: any) => d.weight)
           .attr('fill', (d: any) => d.fill).attr('font-size', (d: any) => d.base).text((d: any) => d.text);
+        enter
+          .on('mouseenter', function (this: any) { select(this).raise().classed('hot', true); })
+          .on('mouseleave', function (this: any) { select(this).classed('hot', false); });
         enter.call(drag<any, any>().container(root.node() as any)
           .subject((ev: any, d: any) => ({ x: d.x, y: d.y }))
-          .on('start', (ev: any, d: any) => { if (!ev.active) sim.alphaTarget(0.32).restart(); d.fx = d.x; d.fy = d.y; })
+          .on('start', function (this: any, ev: any, d: any) { if (!ev.active) sim.alphaTarget(0.32).restart(); d.fx = d.x; d.fy = d.y; select(this).classed('grab', true).raise(); })
           .on('drag', (ev: any, d: any) => { d.fx = ev.x; d.fy = ev.y; })
-          .on('end', (ev: any, d: any) => { if (!ev.active) sim.alphaTarget(0.015).restart(); d.fx = null; d.fy = null; d.vx = (Math.random() - 0.5) * 7; d.vy = (Math.random() - 0.5) * 7; }) as any);
+          .on('end', function (this: any, ev: any, d: any) { if (!ev.active) sim.alphaTarget(0.015).restart(); d.fx = null; d.fy = null; d.vx = (Math.random() - 0.5) * 7; d.vy = (Math.random() - 0.5) * 7; select(this).classed('grab', false); }) as any);
         groups = enter.merge(groups as any);
       }
 

@@ -30,7 +30,7 @@ export default function RemoteResult() {
         <span className="spacer" />
       </div>
 
-      <div className="screen-wide">
+      <div className="screen">
         <div className="screen-head">
           <div>
             <span className="eyebrow">REMOTE-2 · 結果確認</span>
