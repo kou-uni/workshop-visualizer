@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseClient';
+import { ensureSession } from '@/lib/session';
 
 // 個人振り返りの提出（サーバ→secretキーで保存＝RLSバイパス）
 export async function POST(req: Request) {
@@ -13,25 +14,12 @@ export async function POST(req: Request) {
 
   const sb = supabaseAdmin();
   const today = new Date().toISOString().slice(0, 10);
-
-  // 当日セッションを get-or-create
-  let { data: session } = await sb
-    .from('sessions')
-    .select('id')
-    .eq('date', today)
-    .limit(1)
-    .maybeSingle();
-
-  if (!session) {
-    const ins = await sb.from('sessions').insert({ date: today }).select('id').single();
-    if (ins.error) return NextResponse.json({ error: ins.error.message }, { status: 500 });
-    session = ins.data;
-  }
+  const sessionId = await ensureSession(sb, today);
 
   const { data, error } = await sb
     .from('reflections')
     .insert({
-      session_id: session.id,
+      session_id: sessionId,
       discord_name: discordName,
       pr: body.pr ?? null,
       stumble: body.stumble ?? null,
