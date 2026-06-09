@@ -99,8 +99,8 @@ await T('T13', 'GET /api/aggregation：保存済み集約を返す', async () =>
   assert(Array.isArray(j.result.wordCloud), 'result形不正');
 });
 
-await T('T14', '未実装scope（real）→ 500', async () => {
-  const r = await post('/api/aggregate', { scope: 'real' });
+await T('T14', '不正scope → 500', async () => {
+  const r = await post('/api/aggregate', { scope: 'bogus' });
   assert(r.status === 500, `想定500 実際${r.status}`);
 });
 
@@ -115,6 +115,51 @@ await T('T15', 'RLS：publishableは書込不可／secretは可', async () => {
 await T('T16', 'JST日付：セッションのdateがJST当日', async () => {
   const { data } = await admin.from('sessions').select('date').eq('date', TODAY);
   assert(data?.length === 1 && data[0].date === TODAY, `JST当日(${TODAY})のセッションが無い`);
+});
+
+await T('T17', 'チーム作成＋一覧', async () => {
+  const r = await post('/api/teams', { name: 'テスト班', members: ['たろう', 'みさき'] });
+  const j = await r.json(); assert(r.ok && j.id, 'チーム作成失敗');
+  globalThis.__tid = j.id;
+  const list = await (await fetch(BASE + '/api/teams')).json();
+  assert((list.teams || []).some((t) => t.id === j.id), '一覧に出ない');
+});
+
+await T('T18', 'transcript保存→team集約→メンバー持ち寄り', async () => {
+  const tid = globalThis.__tid;
+  await post(`/api/teams/${tid}/transcript`, { transcript: 'たろうは環境変数で詰まったがSecretで解決。みさきは要件が曖昧で手が止まると話した。' });
+  const r = await post('/api/aggregate', { scope: 'team', teamId: tid });
+  const j = await r.json(); assert(r.ok, `team集約失敗 ${JSON.stringify(j)}`);
+  assert((j.result.wordCloud || []).length > 0, 'team雲が空');
+  assert(Array.isArray(j.result.members), 'members無し');
+});
+
+await T('T19', 'real集約・merged集約', async () => {
+  assert((await (await post('/api/aggregate', { scope: 'real' })).json()).result, 'real失敗');
+  assert((await (await post('/api/aggregate', { scope: 'merged' })).json()).result, 'merged失敗');
+});
+
+await T('T20', 'agent/ask：spark が返信（会話）', async () => {
+  const r = await post('/api/agent/ask', { who: 'spark', question: 'いちばんの詰まりは？', answer: '環境変数', context: '環境変数で詰まる人が多い' });
+  const j = await r.json(); assert(r.ok && j.reply && j.reply.length > 5, '返信が無い');
+});
+
+await T('T21', 'transcribe：音声なし→400', async () => {
+  const r = await fetch(BASE + '/api/transcribe', { method: 'POST' });
+  assert(r.status === 400, `想定400 実際${r.status}`);
+});
+
+await T('T22', '全画面に「戻る」ボタン', async () => {
+  for (const p of ['/remote/input', '/onsite/record', '/onsite/live', '/final']) {
+    const html = await (await fetch(BASE + p)).text();
+    assert(html.includes('前の画面に戻る'), `${p} に戻るボタンが無い`);
+  }
+});
+
+await T('T23', 'interpretations は {reads,question}＋members', async () => {
+  const x = (await (await post('/api/aggregate', { scope: 'online' })).json()).result;
+  assert(Array.isArray(x.interpretations.spark.reads) && typeof x.interpretations.spark.question === 'string', 'spark形不正');
+  assert(Array.isArray(x.members), 'members無し');
 });
 
 // 後片付け（当日のテストデータを一掃）
