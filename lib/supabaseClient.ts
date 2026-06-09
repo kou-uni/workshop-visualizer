@@ -1,16 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 
-// ブラウザ／サーバ共通：anon キーで RLS 前提のアクセス
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
-);
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
 
-// サーバ専用：service role（API Route Handler でのみ import すること）
+// ブラウザ／サーバ共通：新方式 publishable（旧 anon）どちらでも動く
+const publishable =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+  '';
+
+export const supabase = createClient(url, publishable);
+
+// サーバ専用：新方式 secret（旧 service_role）。Route Handler でのみ import すること
 export function supabaseAdmin() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? '',
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? '',
-    { auth: { persistSession: false } }
-  );
+  const secret =
+    process.env.SUPABASE_SECRET_KEY ??
+    process.env.SUPABASE_SERVICE_ROLE_KEY ??
+    '';
+  return createClient(url, secret, { auth: { persistSession: false } });
 }
