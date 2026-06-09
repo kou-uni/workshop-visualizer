@@ -32,7 +32,7 @@ export default function AggregationView({ result }: { result: AggregationResult 
       </div>
 
       <div style={{ marginTop: 30 }}>
-        <AgentConversation result={result} />
+        <AgentConversation result={result} autoStart />
       </div>
     </>
   );
