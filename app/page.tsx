@@ -75,7 +75,7 @@ export default function Home() {
         )}
 
         <div className="track-head"><span className="tnum">STEP2</span><h2>集計</h2><span className="line" /></div>
-        <a className="final-card" href="#">
+        <a className="final-card" href="/final">
           <div>
             <span className="fc-k">ALL · 投影</span>
             <div className="fc-title">最終結果</div>
