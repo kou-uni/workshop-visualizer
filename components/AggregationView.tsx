@@ -22,7 +22,14 @@ export default function AggregationView({ result }: { result: AggregationResult 
         </div>
       )}
       {result.trendSummary && (
-        <p style={{ marginTop: 18, fontSize: 16, color: 'var(--fg-2)', lineHeight: 1.8, maxWidth: 780 }}>{result.trendSummary}</p>
+        <div className="card agent-summary" style={{ marginTop: 18 }}>
+          <div className="as-head">
+            <span className="as-av as-spark">S</span>
+            <span className="as-av as-minta">M</span>
+            <span className="eyebrow">spark &amp; minta の見立て</span>
+          </div>
+          <p className="as-text">{result.trendSummary}</p>
+        </div>
       )}
 
       <div className="grid-3" style={{ marginTop: 24 }}>

@@ -593,3 +593,11 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 .mb-bubble { background: #fff0f7; border: 1px solid #ffd0e6; color: #a01060; font-size: 13.5px; font-weight: 600; line-height: 1.65; padding: 11px 15px; border-radius: 4px 16px 16px 16px; max-width: 88%; }
 @keyframes mintaIn { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
 @keyframes mintaWobble { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+
+/* trendSummary：spark & minta の見立て（白カード・重ねアバター・上から言ってる感を消す） */
+.agent-summary .as-head { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+.as-av { width: 28px; height: 28px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-family: var(--mono); font-size: 12px; border: 2px solid var(--bg); }
+.as-spark { background: #29b6e8; margin-right: -14px; z-index: 1; }
+.as-minta { background: var(--minta); }
+.agent-summary .as-head .eyebrow { margin-left: 8px; }
+.as-text { font-size: 15px; line-height: 1.9; font-weight: 500; color: var(--fg); }

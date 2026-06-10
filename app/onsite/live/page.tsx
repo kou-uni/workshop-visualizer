@@ -50,7 +50,7 @@ export default function OnsiteLive() {
             {busy ? '集約中…' : '全体集約を実行'}
           </button>
         </div>
-        <p className="tiny muted" style={{ marginTop: 4 }}>リアル会場の全チーム（卓）を集約します。オンライン参加者は含みません（統合は「最終結果」へ）。</p>
+        <p className="tiny muted" style={{ marginTop: 4 }}>リアル会場の全チーム（卓）を集約します。</p>
         {err && <MintaBusy />}
 
         {result ? <AggregationView result={result} /> : (
