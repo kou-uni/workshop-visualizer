@@ -634,3 +634,7 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
   color: transparent !important;
   box-shadow: none !important;
 }
+
+/* チームタイル：色を廃止しモノクロ統一・緑ドット撤去 */
+.tt2-badge { background: var(--fg); }
+.tt2-dot { display: none; }

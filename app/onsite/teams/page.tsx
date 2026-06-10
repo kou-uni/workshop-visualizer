@@ -6,7 +6,6 @@ import { useEffect, useState } from 'react';
 
 type Team = { id: string; name: string; members: string[] };
 
-const PALETTE = ['#29b6e8', '#ff0080', '#f5a623', '#17c964', '#7928ca', '#0a8acb'];
 const ARROW = (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
 );
@@ -50,12 +49,12 @@ export default function OnsiteTeams() {
           <>
             <div className="track-head" style={{ marginTop: 28 }}><span className="tnum">TEAMS</span><h2>チーム（{teams.length}）</h2><span className="line" /></div>
             <div className="team-grid" style={{ marginTop: 18 }}>
-              {teams.map((t, i) => (
+              {teams.map((t) => (
                 <Link key={t.id} href={`/onsite/team/${t.id}`} className="team-tile2">
-                  <span className="tt2-badge" style={{ background: PALETTE[i % PALETTE.length] }}>{(t.name || '?').slice(0, 1)}</span>
+                  <span className="tt2-badge">{(t.name || '?').slice(0, 1)}</span>
                   <span className="tt2-body">
                     <span className="tt2-name">{t.name}</span>
-                    <span className="tt2-meta"><span className="tt2-dot" />{t.members?.length ? `${t.members.length}名` : 'メンバー未登録'} ・ AI振り返りへ</span>
+                    <span className="tt2-meta">{t.members?.length ? `${t.members.length}名` : 'メンバー未登録'} ・ AI振り返りへ</span>
                   </span>
                   <span className="tt2-arrow">{ARROW}</span>
                 </Link>
