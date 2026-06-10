@@ -63,9 +63,6 @@ export default function TeamResult() {
             <span className="app-head-title">チームの振り返り</span>
             <span className="badge badge-gray" style={{ fontSize: 10, padding: '3px 8px' }}>ONSITE-2</span>
           </div>
-          <Link href="/" className="icon-close" aria-label="close">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-          </Link>
         </header>
 
         <div className="phase-pill phase-pill-full">
