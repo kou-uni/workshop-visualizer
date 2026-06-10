@@ -53,7 +53,7 @@ export default function Home() {
           これまでの取り組みを、プロダクトを中心に意見交換しましょう
         </h1>
 
-        <div className="section-label">STEP1　あなたの参加形態は？（タップで下に移動）</div>
+        <div className="section-label">STEP1　あなたの参加形態は？</div>
         <div className="entry-grid">
           <a className="entry-card online" onClick={() => go('online', onlineRef)}>
             <span className="ico">
