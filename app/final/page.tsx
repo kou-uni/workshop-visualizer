@@ -5,6 +5,7 @@ import BackButton from '@/components/BackButton';
 import { useEffect, useRef, useState } from 'react';
 import AggregationView from '@/components/AggregationView';
 import MintaBusy from '@/components/MintaBusy';
+import { useOps } from '@/lib/useOps';
 import type { AggregationResult } from '@/lib/types';
 
 export default function FinalResult() {
@@ -13,6 +14,7 @@ export default function FinalResult() {
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [err, setErr] = useState('');
   const busyRef = useRef(false);
+  const ops = useOps();
 
   // 自己修復ポーリング：保存済みの最新結果を取り続ける（投影が常に最新・通信断にも強い）
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function FinalResult() {
   const run = async () => {
     setBusy(true); busyRef.current = true; setErr('');
     try {
-      const res = await fetch('/api/aggregate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scope: 'merged' }) });
+      const res = await fetch('/api/aggregate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scope: 'merged', opsKey: ops }) });
       const j = await res.json();
       if (!res.ok) throw new Error(typeof j.error === 'string' ? j.error : '集約に失敗しました');
       setResult(j.result); setUpdatedAt(new Date().toISOString());
@@ -53,16 +55,18 @@ export default function FinalResult() {
             <span className="eyebrow">ALL · リアル＆オンライン統合</span>
             <h1 style={{ fontSize: 36, marginTop: 6 }}>今日の棚卸し、みんなの声</h1>
           </div>
-          <button className="btn btn-primary btn-lg" onClick={run} disabled={busy}>
-            {busy ? '統合中…' : '統合集約を実行'}
-          </button>
+          {ops && (
+            <button className="btn btn-primary btn-lg" onClick={run} disabled={busy}>
+              {busy ? '統合中…' : '統合集約を実行'}
+            </button>
+          )}
         </div>
         {updatedAt && <p className="tiny muted" style={{ marginTop: 6 }}>統合 {new Date(updatedAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</p>}
         {err && <MintaBusy />}
 
         {result ? <AggregationView result={result} /> : (
           <div className="card" style={{ marginTop: 24, textAlign: 'center', padding: '60px 20px' }}>
-            <p className="muted">オンラインとリアルが揃ったら「統合集約を実行」を押してください。</p>
+            <p className="muted">運営が統合集約を実行すると、ここに全体の声が表示されます。</p>
           </div>
         )}
       </div>

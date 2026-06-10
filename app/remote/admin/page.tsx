@@ -5,6 +5,7 @@ import BackButton from '@/components/BackButton';
 import { useEffect, useRef, useState } from 'react';
 import AggregationView from '@/components/AggregationView';
 import MintaBusy from '@/components/MintaBusy';
+import { useOps } from '@/lib/useOps';
 import type { AggregationResult } from '@/lib/types';
 
 export default function RemoteAdmin() {
@@ -13,6 +14,7 @@ export default function RemoteAdmin() {
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [err, setErr] = useState('');
   const busyRef = useRef(false);
+  const ops = useOps();
 
   // 自己修復ポーリング：保存済みの最新結果を取り続ける（操作端末の通信が落ちても投影は最新を表示）
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function RemoteAdmin() {
   const run = async () => {
     setBusy(true); busyRef.current = true; setErr('');
     try {
-      const res = await fetch('/api/aggregate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scope: 'online' }) });
+      const res = await fetch('/api/aggregate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scope: 'online', opsKey: ops }) });
       const j = await res.json();
       if (!res.ok) throw new Error(typeof j.error === 'string' ? j.error : '集約に失敗しました');
       setResult(j.result); setUpdatedAt(new Date().toISOString());
@@ -53,16 +55,18 @@ export default function RemoteAdmin() {
             <span className="eyebrow">REMOTE-5 · オンライン集約</span>
             <h1 style={{ fontSize: 34, marginTop: 6 }}>みんなの振り返りを、ひとつに</h1>
           </div>
-          <button className="btn btn-primary btn-lg" onClick={run} disabled={busy}>
-            {busy ? '集約中…' : '全体集約を実行'}
-          </button>
+          {ops && (
+            <button className="btn btn-primary btn-lg" onClick={run} disabled={busy}>
+              {busy ? '集約中…' : '全体集約を実行'}
+            </button>
+          )}
         </div>
         {updatedAt && <p className="tiny muted" style={{ marginTop: 6 }}>最終集約 {new Date(updatedAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</p>}
         {err && <MintaBusy />}
 
         {!result ? (
           <div className="card" style={{ marginTop: 24, textAlign: 'center', padding: '60px 20px' }}>
-            <p className="muted">まだ集約結果がありません。「全体集約を実行」を押してください。</p>
+            <p className="muted">運営が集約を実行すると、ここに全体像が表示されます。</p>
           </div>
         ) : (
           <AggregationView result={result} />

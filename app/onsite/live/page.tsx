@@ -5,6 +5,7 @@ import BackButton from '@/components/BackButton';
 import { useEffect, useRef, useState } from 'react';
 import AggregationView from '@/components/AggregationView';
 import MintaBusy from '@/components/MintaBusy';
+import { useOps } from '@/lib/useOps';
 import type { AggregationResult } from '@/lib/types';
 
 export default function OnsiteLive() {
@@ -12,6 +13,7 @@ export default function OnsiteLive() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const busyRef = useRef(false);
+  const ops = useOps();
 
   // 自己修復ポーリング：保存済みの最新結果を取り続ける（投影が常に最新・通信断にも強い）
   useEffect(() => {
@@ -31,7 +33,7 @@ export default function OnsiteLive() {
   const run = async () => {
     setBusy(true); busyRef.current = true; setErr('');
     try {
-      const res = await fetch('/api/aggregate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scope: 'real' }) });
+      const res = await fetch('/api/aggregate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scope: 'real', opsKey: ops }) });
       const j = await res.json();
       if (!res.ok) throw new Error(typeof j.error === 'string' ? j.error : '集約に失敗しました');
       setResult(j.result);
@@ -52,16 +54,18 @@ export default function OnsiteLive() {
             <span className="eyebrow">ONSITE-3 · 全体集計</span>
             <h1 style={{ fontSize: 34, marginTop: 6 }}>リアル会場の声を、ひとつに</h1>
           </div>
-          <button className="btn btn-primary btn-lg" onClick={run} disabled={busy}>
-            {busy ? '集約中…' : '全体集約を実行'}
-          </button>
+          {ops && (
+            <button className="btn btn-primary btn-lg" onClick={run} disabled={busy}>
+              {busy ? '集約中…' : '全体集約を実行'}
+            </button>
+          )}
         </div>
         <p className="tiny muted" style={{ marginTop: 4 }}>リアル会場の全チーム（卓）を集約します。</p>
         {err && <MintaBusy />}
 
         {result ? <AggregationView result={result} /> : (
           <div className="card" style={{ marginTop: 24, textAlign: 'center', padding: '50px 20px' }}>
-            <p className="muted">各チームの振り返りが集まったら「全体集約を実行」を押してください。</p>
+            <p className="muted">運営が集約を実行すると、ここに全体像が表示されます。</p>
           </div>
         )}
       </div>
