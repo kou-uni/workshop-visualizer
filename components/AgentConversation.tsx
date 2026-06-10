@@ -14,8 +14,8 @@ const DISC_SCRIPT = [
   { who: 'minta', t: 'いくよ〜！' },
 ];
 
-export default function AgentConversation({ result, autoStart = false, stacked = false }: { result: AggregationResult; autoStart?: boolean; stacked?: boolean }) {
-  const [phase, setPhase] = useState<'cta' | 'analyzing' | 'revealed'>(autoStart ? 'analyzing' : 'cta');
+export default function AgentConversation({ result, autoStart = false, stacked = false, instant = false }: { result: AggregationResult; autoStart?: boolean; stacked?: boolean; instant?: boolean }) {
+  const [phase, setPhase] = useState<'cta' | 'analyzing' | 'revealed'>(instant ? 'revealed' : autoStart ? 'analyzing' : 'cta');
   const context = result.trendSummary || '';
 
   useEffect(() => {

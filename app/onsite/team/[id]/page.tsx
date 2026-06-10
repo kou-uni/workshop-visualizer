@@ -27,6 +27,7 @@ export default function TeamResult() {
 
   const talk = async () => {
     setRunning(true); setErr('');
+    const t0 = Date.now();
     let r = result;
     try {
       if (!r) {
@@ -35,6 +36,8 @@ export default function TeamResult() {
         if (!res.ok) throw new Error(j.error || '分析に失敗しました');
         r = j.result as AggregationResult; setResult(r);
       }
+      const elapsed = Date.now() - t0;
+      if (elapsed < 3400) await new Promise((res) => setTimeout(res, 3400 - elapsed)); // 議論中の演出を最低3.4秒見せる
       setTalkStarted(true);
     } catch (e: any) { setErr(e.message); } finally { setRunning(false); }
   };
@@ -80,7 +83,7 @@ export default function TeamResult() {
 
         {!talkStarted ? (
           <div className="talk-cta" id="talkCta">
-            <div className="talk-bubble">一緒に議論しようよ〜！</div>
+            {running ? <DiscussBubbles /> : <div className="talk-bubble">一緒に議論しようよ〜！</div>}
             <button className="btn btn-primary btn-block btn-lg" onClick={talk} disabled={running}>
               {running ? <><span className="btn-spin" /> spark と minta が議論中…</> : '🗨 spark & minta と話す'}
             </button>
@@ -88,7 +91,7 @@ export default function TeamResult() {
         ) : (
           result && (
             <div style={{ marginTop: 18 }}>
-              <AgentConversation result={result} autoStart stacked />
+              <AgentConversation result={result} instant stacked />
               <button className="btn btn-block" style={{ marginTop: 14 }} onClick={reAnalyze} disabled={running}>
                 {running ? <><span className="btn-spin" /> 分析中…</> : '🔄 もう一度分析する'}
               </button>
@@ -96,6 +99,32 @@ export default function TeamResult() {
           )
         )}
       </div>
+    </div>
+  );
+}
+
+// 議論中の演出：spark と minta が裏で話している吹き出しがポンポン湧き上がる
+const DISC = [
+  { who: 'minta', t: 'ふむふむ、共通点ありそう！' },
+  { who: 'spark', t: 'お、いいハック見つけた' },
+  { who: 'minta', t: 'それ面白いね〜' },
+  { who: 'spark', t: 'ここテンプレ化できそう' },
+  { who: 'minta', t: '“誰のため”が効いてるなぁ' },
+  { who: 'spark', t: 'よし、まとめよっか！' },
+];
+
+function DiscussBubbles() {
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    const iv = setInterval(() => setN((x) => x + 1), 620);
+    return () => clearInterval(iv);
+  }, []);
+  const recent = [n - 2, n - 1, n].filter((i) => i >= 0).map((i) => ({ ...DISC[i % DISC.length], key: i }));
+  return (
+    <div className="discuss-bubbles">
+      {recent.map((b) => (
+        <div key={b.key} className={`chat-pop chat-${b.who}`}>{b.t}</div>
+      ))}
     </div>
   );
 }
