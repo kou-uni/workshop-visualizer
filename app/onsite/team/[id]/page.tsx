@@ -33,13 +33,13 @@ export default function TeamResult() {
       if (!r) {
         const res = await fetch('/api/aggregate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scope: 'team', teamId: id }) });
         const j = await res.json();
-        if (!res.ok) throw new Error(j.error || '分析に失敗しました');
+        if (!res.ok) throw new Error(typeof j.error === 'string' ? j.error : '分析に失敗しました');
         r = j.result as AggregationResult; setResult(r);
       }
       const elapsed = Date.now() - t0;
       if (elapsed < 5200) await new Promise((res) => setTimeout(res, 5200 - elapsed)); // 議論中の演出を最低5.2秒見せる（3個ほど）
       setTalkStarted(true);
-    } catch (e: any) { setErr(e.message); } finally { setRunning(false); }
+    } catch (e: any) { setErr(typeof e?.message === 'string' && e.message ? e.message : '分析に失敗しました。少し待って、もう一度お試しください。'); } finally { setRunning(false); }
   };
 
   const reAnalyze = async () => {
@@ -49,7 +49,7 @@ export default function TeamResult() {
       const j = await res.json();
       if (!res.ok) throw new Error(j.error || '分析に失敗しました');
       setResult(j.result as AggregationResult);
-    } catch (e: any) { setErr(e.message); } finally { setRunning(false); }
+    } catch (e: any) { setErr(typeof e?.message === 'string' && e.message ? e.message : '分析に失敗しました。少し待って、もう一度お試しください。'); } finally { setRunning(false); }
   };
 
   return (
