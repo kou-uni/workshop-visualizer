@@ -182,7 +182,7 @@ export default function OnsiteRecord() {
 
         {err && <p className="tiny" style={{ color: 'var(--minta)', marginBottom: 10 }}>{err}</p>}
         <button className="btn btn-primary btn-block" disabled={busy || !transcript.trim()} style={{ opacity: transcript.trim() ? 1 : 0.5 }} onClick={() => submit(transcript)}>
-          {busy ? <><span className="btn-spin" /> アップロード中…</> : '提出'}
+          {busy ? <><span className="btn-spin" /> 提出中…（アップロード）</> : '提出'}
         </button>
       </div>
     </div>

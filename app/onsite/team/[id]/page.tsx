@@ -70,9 +70,9 @@ export default function TeamResult() {
         </div>
 
         <div className="card" style={{ marginTop: 16 }}>
-          <span className="eyebrow" style={{ display: 'block', marginBottom: 8 }}>議論のサマリ</span>
+          <span className="eyebrow" style={{ display: 'block', marginBottom: 8 }}>💬 議論のサマリ ・ spark &amp; minta がまとめました</span>
           {result?.discussionSummary
-            ? <p style={{ fontSize: 14, lineHeight: 1.85 }}>{result.discussionSummary}</p>
+            ? <p style={{ fontSize: 14.5, lineHeight: 1.9, fontWeight: 500 }}>{result.discussionSummary}</p>
             : <p className="tiny muted" style={{ lineHeight: 1.7 }}>「spark &amp; minta と話す」を押すと、録音から議論の概要（どんな議論だったか）をまとめます。</p>}
         </div>
 
@@ -82,7 +82,7 @@ export default function TeamResult() {
           <div className="talk-cta" id="talkCta">
             <div className="talk-bubble">一緒に議論しようよ〜！</div>
             <button className="btn btn-primary btn-block btn-lg" onClick={talk} disabled={running}>
-              {running ? <><span className="btn-spin" /> AIが読んでいます…</> : '🗨 spark & minta と話す'}
+              {running ? <><span className="btn-spin" /> spark と minta が議論中…</> : '🗨 spark & minta と話す'}
             </button>
           </div>
         ) : (

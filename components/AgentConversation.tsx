@@ -4,38 +4,36 @@ import { useEffect, useState } from 'react';
 import Typewriter from './Typewriter';
 import type { AggregationResult, AgentInterpretation } from '@/lib/types';
 
-// spark/minta 会話モジュール：「話す」→ くるくる → 読み解き → Q&A（1往復・AI返信）
+// spark と minta が議論しているような掛け合い（ポンポン出る）
+const DISC_SCRIPT = [
+  { who: 'spark', t: 'ふむふむ、共通点ありそう！' },
+  { who: 'minta', t: 'それ面白いね〜' },
+  { who: 'spark', t: 'ここ、テンプレ化できそう' },
+  { who: 'minta', t: '“誰のため”が効いてるなぁ' },
+  { who: 'spark', t: 'よし、まとめよっか！' },
+  { who: 'minta', t: 'いくよ〜！' },
+];
+
 export default function AgentConversation({ result, autoStart = false, stacked = false }: { result: AggregationResult; autoStart?: boolean; stacked?: boolean }) {
   const [phase, setPhase] = useState<'cta' | 'analyzing' | 'revealed'>(autoStart ? 'analyzing' : 'cta');
   const context = result.trendSummary || '';
 
   useEffect(() => {
     if (phase !== 'analyzing') return;
-    const t = setTimeout(() => setPhase('revealed'), 2600);
+    const t = setTimeout(() => setPhase('revealed'), 3400);
     return () => clearTimeout(t);
   }, [phase]);
-
-  const start = () => setPhase('analyzing');
 
   if (phase === 'cta') {
     return (
       <div className="talk-cta">
         <div className="talk-bubble">spark &amp; minta に聞いてみよ〜！</div>
-        <div>
-          <button className="btn btn-primary btn-lg" onClick={start}>2人に読み解いてもらう</button>
-        </div>
+        <div><button className="btn btn-primary btn-lg" onClick={() => setPhase('analyzing')}>2人に読み解いてもらう</button></div>
       </div>
     );
   }
 
-  if (phase === 'analyzing') {
-    return (
-      <div style={{ textAlign: 'center', padding: '48px 0' }}>
-        <div className="spinner" style={{ margin: '0 auto 18px' }} />
-        <Analyzing />
-      </div>
-    );
-  }
+  if (phase === 'analyzing') return <Discussing />;
 
   return (
     <div className={stacked ? 'agent-stack' : 'grid-2'}>
@@ -45,33 +43,45 @@ export default function AgentConversation({ result, autoStart = false, stacked =
   );
 }
 
-function Analyzing() {
-  const msgs = ['議論を読み込んでいます…', '共通点をさがしています…', 'もうすぐ、まとめます！'];
-  const [i, setI] = useState(0);
+function Discussing() {
+  const [n, setN] = useState(0);
   useEffect(() => {
-    const iv = setInterval(() => setI((x) => (x + 1) % msgs.length), 950);
+    const iv = setInterval(() => setN((x) => (x < DISC_SCRIPT.length ? x + 1 : x)), 470);
     return () => clearInterval(iv);
   }, []);
-  return <div className="muted" style={{ fontSize: 14 }}>{msgs[i]}</div>;
+  return (
+    <div className="discussing">
+      <div className="discussing-head"><span className="agent-spin" /> spark と minta が議論中…</div>
+      <div className="dbubbles">
+        {DISC_SCRIPT.slice(0, n).map((b, i) => (
+          <div className={`dbubble dbubble-${b.who} pop`} key={i}>{b.t}</div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function AgentCard({ who, lens, data, context }: { who: 'spark' | 'minta'; lens: string; data: AgentInterpretation; context: string }) {
   const [collapsed, setCollapsed] = useState(false);
   const [answer, setAnswer] = useState('');
-  const [reply, setReply] = useState('');
+  const [turns, setTurns] = useState<{ q: string; a: string }[]>([]);
   const [asking, setAsking] = useState(false);
   const reads = data?.reads ?? [];
 
   const send = async () => {
     const a = answer.trim();
-    if (!a) return;
-    setAsking(true); setReply('');
+    if (!a || asking) return;
+    setAnswer('');
+    const idx = turns.length;
+    setTurns((t) => [...t, { q: a, a: '' }]);
+    setAsking(true);
     try {
       const res = await fetch('/api/agent/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ who, question: data.question, answer: a, context }) });
       const j = await res.json();
-      setReply(j.reply || '…');
-    } catch { setReply('うまく返せなかった…もう一度試してみて！'); }
-    finally { setAsking(false); }
+      setTurns((t) => t.map((x, i) => (i === idx ? { ...x, a: j.reply || '…' } : x)));
+    } catch {
+      setTurns((t) => t.map((x, i) => (i === idx ? { ...x, a: 'うまく返せなかった…もう一度送ってみて！' } : x)));
+    } finally { setAsking(false); }
   };
 
   return (
@@ -94,15 +104,22 @@ function AgentCard({ who, lens, data, context }: { who: 'spark' | 'minta'; lens:
 
         {data.question && (
           <div className="ask" data-kind={who}>
-            <div className="ask-q"><span className="qi">❓</span>{data.question}</div>
-            <div className="ask-row">
-              <input className="input ask-input" placeholder="ひとことで答えてみて" value={answer}
+            <div className="ask-q"><span className="qi">{who === 'minta' ? '💡' : '🛠'}</span>{data.question}</div>
+
+            {turns.map((t, i) => (
+              <div className="ask-turn" key={i}>
+                <div className="ask-you">{t.q}</div>
+                {t.a ? <div className="ask-reply"><Typewriter text={t.a} /></div> : <div className="ask-reply muted">考え中…</div>}
+              </div>
+            ))}
+
+            <div className="ask-row" style={{ marginTop: turns.length ? 11 : 0 }}>
+              <input className="input ask-input" placeholder="ひとことで答えてみて（何回でもOK）" value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') send(); }}
-                disabled={asking || !!reply} />
-              <button className="btn ask-send" onClick={send} disabled={asking || !!reply}>{asking ? '…' : '送る'}</button>
+                onKeyDown={(e) => { if (e.key === 'Enter' && !(e.nativeEvent as any).isComposing) { e.preventDefault(); send(); } }}
+                disabled={asking} />
+              <button className="btn ask-send" onClick={send} disabled={asking || !answer.trim()}>{asking ? '…' : '送る'}</button>
             </div>
-            {reply && <div className="ask-reply"><Typewriter text={reply} /></div>}
           </div>
         )}
       </div>
