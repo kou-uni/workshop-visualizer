@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import BackButton from '@/components/BackButton';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AggregationView from '@/components/AggregationView';
 import MintaBusy from '@/components/MintaBusy';
 import type { AggregationResult } from '@/lib/types';
@@ -14,6 +14,8 @@ export default function OnsiteLive() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const teamsRef = useRef<HTMLDivElement>(null);
+  const toTeams = () => teamsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   const loadTeams = () => fetch('/api/teams').then((r) => r.json()).then((j) => setTeams(j.teams ?? [])).catch(() => {});
 
@@ -51,6 +53,10 @@ export default function OnsiteLive() {
           </button>
         </div>
         <p className="tiny muted" style={{ marginTop: 4 }}>リアル会場の全チーム（卓）を集約します。</p>
+        <button className="btn" style={{ marginTop: 12 }} onClick={toTeams}>
+          チームごとの振り返りはこちら
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginLeft: 2 }}><path d="M12 5v14M6 13l6 6 6-6" /></svg>
+        </button>
         {err && <MintaBusy />}
 
         {result ? <AggregationView result={result} /> : (
@@ -59,7 +65,7 @@ export default function OnsiteLive() {
           </div>
         )}
 
-        <div className="track-head" style={{ marginTop: 40 }}><span className="tnum">TEAMS</span><h2>チーム（{teams.length}）</h2><span className="line" /></div>
+        <div className="track-head" ref={teamsRef} style={{ marginTop: 40, scrollMarginTop: 76 }}><span className="tnum">TEAMS</span><h2>チーム（{teams.length}）</h2><span className="line" /></div>
         {teams.length === 0 ? (
           <p className="tiny muted">まだチームがありません。</p>
         ) : (
