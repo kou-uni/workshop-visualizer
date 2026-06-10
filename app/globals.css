@@ -624,3 +624,13 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 .tt2-arrow { flex: none; color: var(--fg-3); transition: .18s; display: flex; }
 .tt2-arrow svg { width: 18px; height: 18px; }
 .team-tile2:hover .tt2-arrow { color: var(--fg); transform: translateX(3px); }
+
+/* 左上ロゴ：web3/AI概論のペンギン（public/logo.png） */
+.logo-dot {
+  background: url('/logo.png') center / contain no-repeat !important;
+  width: 32px; height: 27px;
+  border-radius: 0 !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  box-shadow: none !important;
+}
