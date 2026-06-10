@@ -24,7 +24,7 @@ export default function OnsiteLive() {
         .catch(() => {});
     };
     load();
-    const iv = setInterval(load, 8000);
+    const iv = setInterval(load, 30000);
     return () => { alive = false; clearInterval(iv); };
   }, []);
 
