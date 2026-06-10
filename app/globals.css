@@ -638,3 +638,6 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 /* チームタイル：色を廃止しモノクロ統一・緑ドット撤去 */
 .tt2-badge { background: var(--fg); }
 .tt2-dot { display: none; }
+
+/* 個人の振り返り 発表ビュー：大きめで読みやすいテキスト */
+.present-text { font-size: 18px; line-height: 1.9; margin-top: 12px; white-space: pre-wrap; color: var(--fg); font-weight: 500; }

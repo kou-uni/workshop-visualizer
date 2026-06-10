@@ -3,6 +3,19 @@ import { supabaseAdmin } from '@/lib/supabaseClient';
 import { ensureSession } from '@/lib/session';
 import { todayJST } from '@/lib/date';
 
+// 当日の個人振り返り一覧（発表用ビュー）
+export async function GET() {
+  const sb = supabaseAdmin();
+  const { data: s } = await sb.from('sessions').select('id').eq('date', todayJST()).order('created_at', { ascending: true }).limit(1).maybeSingle();
+  if (!s) return NextResponse.json({ reflections: [] });
+  const { data } = await sb
+    .from('reflections')
+    .select('id,discord_name,pr,stumble,hack,trouble,created_at')
+    .eq('session_id', s.id)
+    .order('created_at', { ascending: true });
+  return NextResponse.json({ reflections: data ?? [] });
+}
+
 // 個人振り返りの提出（サーバ→secretキーで保存＝RLSバイパス）
 export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
