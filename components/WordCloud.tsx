@@ -20,7 +20,7 @@ function fweight(f: string) {
   if (f === FACES.sans) return 600;
   return 500;
 }
-const SZ: Record<number, number> = { 5: 48, 4: 35, 3: 26, 2: 20, 1: 15 };
+const SZ: Record<number, number> = { 5: 44, 4: 33, 3: 25, 2: 19, 1: 14 };
 
 // 3D 回転スフィア（球面に文字が張り付く・グリグリ回せる・多書体）
 export default function WordCloud({ words }: { words: Word[] }) {
@@ -57,6 +57,7 @@ export default function WordCloud({ words }: { words: Word[] }) {
 
       const texts = words.map((w) => w.keyword);
       tc = TagCloud(el, texts, { radius, maxSpeed: 'fast', initSpeed: 'normal', direction: 135, keep: true });
+      try { (tc as any).depth = radius * 1.05; } catch {} // 遠近感を強める（既定 2*radius → 小さくして前後の大小差UP）
 
       const u = radius / 300;
       const apply = () => {

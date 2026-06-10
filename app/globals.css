@@ -536,3 +536,6 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 .cloud3d .tagcloud { width: 100%; }
 .cloud3d .tagcloud--item { cursor: grab; user-select: none; line-height: 1; transition: color .2s ease; }
 .cloud3d .tagcloud--item:hover { color: var(--minta) !important; }
+
+/* 3D雲：単語は1行固定（折り返し防止） */
+.cloud3d .tagcloud--item { white-space: nowrap; }
