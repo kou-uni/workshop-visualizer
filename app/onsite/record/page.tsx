@@ -18,7 +18,9 @@ export default function OnsiteRecord() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [members, setMembers] = useState<string[]>(['', '', '', '']);
+  const [paste, setPaste] = useState('');
   const [fbOpen, setFbOpen] = useState(false);
+  const [recOpen, setRecOpen] = useState(false);
   const [fb, setFb] = useState<string[]>(['', '', '', '']);
 
   const [recState, setRecState] = useState<'idle' | 'recording' | 'done'>('idle');
@@ -36,7 +38,7 @@ export default function OnsiteRecord() {
   const segTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const transcriptRef = useRef('');
-  const pendingRef = useRef(0); // 文字起こし未完のセグメント数
+  const pendingRef = useRef(0);
 
   const setMember = (i: number, v: string) => {
     const next = [...members];
@@ -56,9 +58,6 @@ export default function OnsiteRecord() {
         transcriptRef.current = (transcriptRef.current + ' ' + j.text).trim();
         setTranscript(transcriptRef.current);
         setSegDone((n) => n + 1);
-        console.log('[rec] セグメント文字起こし反映', { text: j.text });
-      } else {
-        console.warn('[rec] セグメント文字起こし失敗', res.status, j);
       }
     } catch { /* セグメント単位の失敗は無視して継続 */ }
     finally { pendingRef.current = Math.max(0, pendingRef.current - 1); setSegBusy(pendingRef.current > 0); }
@@ -68,22 +67,18 @@ export default function OnsiteRecord() {
     const stream = streamRef.current;
     if (!stream) return;
     let mr: MediaRecorder;
-    try { mr = new MediaRecorder(stream, { audioBitsPerSecond: 48000 }); } // 低ビットレートでセグメントを小さく
+    try { mr = new MediaRecorder(stream, { audioBitsPerSecond: 48000 }); }
     catch { mr = new MediaRecorder(stream); }
     const chunks: Blob[] = [];
     mr.ondataavailable = (e) => { if (e.data?.size) chunks.push(e.data); };
     mr.onstop = () => {
       if (chunks.length) transcribeSegment(new Blob(chunks, { type: chunks[0].type || 'audio/webm' }));
-      if (recordingRef.current) startSegment(); // 次のセグメントへ（録音は途切れさせない）
+      if (recordingRef.current) startSegment();
       else finalizeStop();
     };
     mr.start();
     mrRef.current = mr;
-    console.log('[rec] セグメント開始（20秒後に区切ります）');
-    segTimeoutRef.current = setTimeout(() => {
-      console.log('[rec] 20秒経過 → 区切って文字起こしへ');
-      if (mr.state === 'recording') mr.stop();
-    }, SEGMENT_MS);
+    segTimeoutRef.current = setTimeout(() => { if (mr.state === 'recording') mr.stop(); }, SEGMENT_MS);
   };
 
   const start = async () => {
@@ -91,8 +86,7 @@ export default function OnsiteRecord() {
     try {
       streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch {
-      setNote('マイクが使えませんでした。「うまく録音できない場合」からテキストで提出してください。');
-      setFbOpen(true);
+      setNote('マイクが使えませんでした。①貼り付け か ③テキスト入力で提出してください。');
       return;
     }
     recordingRef.current = true;
@@ -106,7 +100,7 @@ export default function OnsiteRecord() {
     if (segTimeoutRef.current) clearTimeout(segTimeoutRef.current);
     if (elapsedRef.current) clearInterval(elapsedRef.current);
     const mr = mrRef.current;
-    if (mr && mr.state === 'recording') mr.stop(); // 最終セグメント → onstop → finalize
+    if (mr && mr.state === 'recording') mr.stop();
     else finalizeStop();
   };
 
@@ -120,7 +114,7 @@ export default function OnsiteRecord() {
 
   const submit = async (text: string) => {
     if (!name.trim()) { setErr('チーム名を入力してください'); return; }
-    if (!text.trim()) { setErr('録音（自動文字起こし）か、テキスト入力のどちらかを行ってください'); return; }
+    if (!text.trim()) { setErr('いずれかの方法で議論の内容を入力してください'); return; }
     setErr(''); setBusy(true);
     try {
       const r1 = await fetch('/api/teams', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, members: members.filter((m) => m.trim()) }) });
@@ -131,12 +125,8 @@ export default function OnsiteRecord() {
     } catch (e: any) { setErr(e.message); setBusy(false); }
   };
 
-  const submitFallback = () => {
-    const text = FB.map((f, i) => fb[i]?.trim() && `${f.label}：${fb[i].trim()}`).filter(Boolean).join(' / ');
-    submit(text);
-  };
-
-  const canSubmit = recState === 'done' && !segBusy && !!transcript.trim();
+  const submitFallback = () => submit(FB.map((f, i) => fb[i]?.trim() && `${f.label}：${fb[i].trim()}`).filter(Boolean).join(' / '));
+  const canSubmitRec = recState === 'done' && !segBusy && !!transcript.trim();
 
   return (
     <div className="device">
@@ -152,31 +142,24 @@ export default function OnsiteRecord() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
           </Link>
         </header>
-        <p style={{ fontSize: 12, color: 'var(--fg-3)', margin: '4px 2px 0' }}>代表者のスマホで実施してください。録音中、文字起こしがリアルタイムで進みます（長時間OK）。</p>
 
-        {/* 録音できない場合のテキストフォーム（アコーディオン） */}
-        <button className={`accordion-toggle ${fbOpen ? 'open' : ''}`} style={{ marginTop: 14 }} onClick={() => setFbOpen((o) => !o)}>
-          <span>うまく録音できない場合はこちら</span>
-          <svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-        </button>
-        <div className={`accordion-body ${fbOpen ? 'open' : ''}`}>
-          <div style={{ padding: '14px 2px 4px' }}>
-            <p className="tiny muted" style={{ marginBottom: 12 }}>録音の代わりに、チームの振り返りをテキストで記録します（内容は最終結果に反映されます）。</p>
-            {FB.map((f, i) => (
-              <div className="field" key={f.n}>
-                <div className="field-head"><label><span className="num">{f.n}</span> {f.label}</label></div>
-                <textarea className="textarea" placeholder={f.ph} value={fb[i]} onChange={(e) => setFb((v) => { const n = [...v]; n[i] = e.target.value; return n; })} />
-              </div>
-            ))}
-            <button className="btn btn-primary btn-block" onClick={submitFallback} disabled={busy}>{busy ? <><span className="btn-spin" /> 送信中…</> : 'テキストで提出'}</button>
-          </div>
+        {/* 議論のお題（何を話すか） */}
+        <div className="card" style={{ marginTop: 12, padding: '18px 20px' }}>
+          <span className="eyebrow" style={{ display: 'block', marginBottom: 10 }}>💬 このチームで話すこと</span>
+          <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 8, fontSize: 13.5, lineHeight: 1.5 }}>
+            <li>① 各自のプロダクトを一言で紹介</li>
+            <li>② つまずいた点と、どう乗り越えたか</li>
+            <li>③ 使えたハック・ちょっとした工夫</li>
+            <li>④ いま困っていること</li>
+          </ul>
+          <p className="tiny muted" style={{ marginTop: 10, lineHeight: 1.6 }}>議論したら、下のいずれかの方法で内容を取り込み、AIに振り返ってもらいましょう。</p>
         </div>
 
+        {/* チーム名・メンバー */}
         <div className="field" style={{ marginTop: 16 }}>
           <label>チーム名 <span className="hint">本日限定、自由記入</span></label>
           <input className="input" placeholder="チーム名を入力" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-
         <div className="field">
           <label>メンバー <span className="hint">（Discord名）・最大7名</span></label>
           <div id="memberList">
@@ -186,34 +169,66 @@ export default function OnsiteRecord() {
           </div>
         </div>
 
-        <div className="card" style={{ textAlign: 'center', padding: '24px 20px' }}>
-          <div className="eyebrow">{recState === 'recording' ? '録音中 — タップで停止' : recState === 'done' ? '録音を確認 → 提出' : '録音 — タップで開始'}</div>
-          <div className={`record-btn ${recState === 'recording' ? '' : 'idle'}`} onClick={() => (recState === 'recording' ? stop() : start())}><div className="sq" /></div>
-          <div className="mono" style={{ fontSize: 22, fontWeight: 600 }}>{fmt(sec)}</div>
-          <div className="wave" style={{ display: recState === 'recording' ? 'flex' : 'none' }}>
-            {Array.from({ length: 10 }).map((_, i) => <i key={i} style={{ animationDelay: `${i * 0.08}s` }} />)}
-          </div>
-          <div className="tiny muted" style={{ marginTop: 8 }}>
-            {recState === 'recording' ? (segBusy ? '文字起こし中…（20秒ごとに逐次）' : '録音 · 文字起こし進行中') : '録音 · AI文字起こし'}
-          </div>
-          {recState === 'done' && <button className="btn btn-block" style={{ marginTop: 14 }} onClick={reRecord}>録り直す</button>}
+        {err && <p className="tiny" style={{ color: 'var(--minta)', margin: '4px 0 10px' }}>{err}</p>}
+
+        {/* ① 文字起こしを貼り付け（おすすめ） */}
+        <div className="group-label">① 文字起こしを貼り付け <span className="muted">（おすすめ・いちばん確実）</span></div>
+        <div className="card" style={{ padding: '16px 18px' }}>
+          <p className="tiny muted" style={{ marginBottom: 10, lineHeight: 1.6 }}>iPhoneのボイスメモ等で議論を録音・文字起こしして、その文章をそのまま貼り付け。アプリ側に元データが残るので一番安全です。</p>
+          <textarea className="textarea" style={{ minHeight: 120 }} placeholder="文字起こしした議論の内容をここに貼り付け…" value={paste} onChange={(e) => setPaste(e.target.value)} />
+          <button className="btn btn-primary btn-block btn-lg" style={{ marginTop: 12 }} disabled={busy || !paste.trim()} onClick={() => submit(paste)}>
+            {busy ? <><span className="btn-spin" /> 送信中…</> : 'この内容でサマリ化する'}
+          </button>
         </div>
 
-        {recState !== 'idle' && (
-          <div className="card" style={{ padding: '14px 16px', background: 'var(--gray-100)' }}>
-            <span className="eyebrow" style={{ display: 'block', marginBottom: 6 }}>
-              文字起こし · 20秒ごとに反映（{segDone}区切り済）{segBusy && ' · 処理中…'}
-            </span>
-            <div style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--fg)', maxHeight: 200, overflowY: 'auto' }}>
-              {transcript || <span className="muted">{recState === 'recording' ? '最初の文字起こしは約20秒後に出ます（以降20秒ごとに追記されます）…' : note}</span>}
-            </div>
-          </div>
-        )}
-
-        {err && <p className="tiny" style={{ color: 'var(--minta)', marginBottom: 10 }}>{err}</p>}
-        <button className="btn btn-primary btn-block" disabled={busy || !canSubmit} style={{ opacity: canSubmit ? 1 : 0.5 }} onClick={() => submit(transcript)}>
-          {busy ? <><span className="btn-spin" /> 提出中…（アップロード）</> : segBusy && recState === 'done' ? '文字起こし仕上げ中…' : '提出'}
+        {/* ② この場で録音 */}
+        <div className="group-label" style={{ marginTop: 26 }}>② この場で録音 <span className="muted">（20秒ごとに自動文字起こし）</span></div>
+        <button className={`accordion-toggle ${recOpen ? 'open' : ''}`} onClick={() => setRecOpen((o) => !o)}>
+          <span>このスマホで録音する</span>
+          <svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
         </button>
+        <div className={`accordion-body ${recOpen ? 'open' : ''}`}>
+          <div className="card" style={{ textAlign: 'center', padding: '24px 20px', marginTop: 12 }}>
+            <div className="eyebrow">{recState === 'recording' ? '録音中 — タップで停止' : recState === 'done' ? '録音を確認 → 提出' : '録音 — タップで開始'}</div>
+            <div className={`record-btn ${recState === 'recording' ? '' : 'idle'}`} onClick={() => (recState === 'recording' ? stop() : start())}><div className="sq" /></div>
+            <div className="mono" style={{ fontSize: 22, fontWeight: 600 }}>{fmt(sec)}</div>
+            <div className="wave" style={{ display: recState === 'recording' ? 'flex' : 'none' }}>
+              {Array.from({ length: 10 }).map((_, i) => <i key={i} style={{ animationDelay: `${i * 0.08}s` }} />)}
+            </div>
+            <div className="tiny muted" style={{ marginTop: 8 }}>録音 · AI文字起こし</div>
+            {recState === 'done' && <button className="btn btn-block" style={{ marginTop: 14 }} onClick={reRecord}>録り直す</button>}
+          </div>
+
+          {recState !== 'idle' && (
+            <div className="card" style={{ padding: '14px 16px', background: 'var(--gray-100)' }}>
+              <span className="eyebrow" style={{ display: 'block', marginBottom: 6 }}>文字起こし · 20秒ごとに反映（{segDone}区切り済）{segBusy && ' · 処理中…'}</span>
+              <div style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--fg)', maxHeight: 200, overflowY: 'auto' }}>
+                {transcript || <span className="muted">{recState === 'recording' ? '最初の文字起こしは約20秒後に出ます（以降20秒ごとに追記）…' : note}</span>}
+              </div>
+            </div>
+          )}
+          <button className="btn btn-primary btn-block" disabled={busy || !canSubmitRec} style={{ opacity: canSubmitRec ? 1 : 0.5 }} onClick={() => submit(transcript)}>
+            {busy ? <><span className="btn-spin" /> 提出中…</> : segBusy && recState === 'done' ? '文字起こし仕上げ中…' : '録音内容で提出'}
+          </button>
+        </div>
+
+        {/* ③ うまく録音できない場合（テキスト入力） */}
+        <div className="group-label" style={{ marginTop: 26 }}>③ うまく録音できない場合 <span className="muted">（テキストで入力）</span></div>
+        <button className={`accordion-toggle ${fbOpen ? 'open' : ''}`} onClick={() => setFbOpen((o) => !o)}>
+          <span>テキストで入力する</span>
+          <svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
+        </button>
+        <div className={`accordion-body ${fbOpen ? 'open' : ''}`}>
+          <div style={{ padding: '14px 2px 4px' }}>
+            {FB.map((f, i) => (
+              <div className="field" key={f.n}>
+                <div className="field-head"><label><span className="num">{f.n}</span> {f.label}</label></div>
+                <textarea className="textarea" placeholder={f.ph} value={fb[i]} onChange={(e) => setFb((v) => { const n = [...v]; n[i] = e.target.value; return n; })} />
+              </div>
+            ))}
+            <button className="btn btn-primary btn-block" onClick={submitFallback} disabled={busy}>{busy ? <><span className="btn-spin" /> 送信中…</> : 'テキストで提出'}</button>
+          </div>
+        </div>
       </div>
     </div>
   );
