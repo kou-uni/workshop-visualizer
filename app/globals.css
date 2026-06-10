@@ -545,3 +545,6 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 .cloud-lines .core-glow { animation: corePulse 3.4s ease-in-out infinite; }
 @keyframes corePulse { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
 .cloud3d .tagcloud--item { z-index: 1; }
+
+/* 3D雲：TagCloudが el を 2*radius 幅に整形するので中央寄せ */
+.cloud3d { margin-left: auto; margin-right: auto; }

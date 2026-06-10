@@ -23,7 +23,7 @@ function fweight(f: string) {
 const SZ: Record<number, number> = { 5: 44, 4: 33, 3: 25, 2: 19, 1: 14 };
 const NS = 'http://www.w3.org/2000/svg';
 
-// 3D 回転スフィア（球面に文字＋中心に淡く輝くコア＋各ワードへ放射状の細い線）
+// 3D 回転スフィア（球面に文字＋中心に淡く輝くコア＋各ワード中心へ放射状の細い線）
 export default function WordCloud({ words }: { words: Word[] }) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -54,13 +54,12 @@ export default function WordCloud({ words }: { words: Word[] }) {
 
       const W = Math.max(el.clientWidth, 300);
       const radius = Math.round(Math.min(W * 0.46, 420));
-      const H = radius * 2 + 50;
-      el.style.height = H + 'px';
       el.innerHTML = '';
 
       const texts = words.map((w) => w.keyword);
+      // TagCloud は el を 2*radius 四方に整形し、items は中心(=radius,radius)からの相対座標 item.x/y を持つ
       tc = TagCloud(el, texts, { radius, maxSpeed: 'fast', initSpeed: 'normal', direction: 135, keep: true });
-      try { (tc as any).depth = radius * 1.05; } catch {} // 遠近感を強める
+      try { (tc as any).depth = radius * 1.05; } catch {} // 遠近感
 
       const u = radius / 300;
       const apply = () => {
@@ -77,11 +76,12 @@ export default function WordCloud({ words }: { words: Word[] }) {
       requestAnimationFrame(apply);
       setTimeout(apply, 80);
 
-      // --- 中心コア＋放射状の線（SVGオーバーレイ・回転追従） ---
-      const cx = W / 2, cy = H / 2;
+      // --- 中心コア＋放射状の線（中心は (radius, radius) ＝球の真の中心）---
+      const SW = 2 * radius;
+      const c = radius;
       const svg = document.createElementNS(NS, 'svg');
       svg.setAttribute('class', 'cloud-lines');
-      svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      svg.setAttribute('viewBox', `0 0 ${SW} ${SW}`);
       svg.innerHTML =
         `<defs><radialGradient id="coreG" cx="50%" cy="50%" r="50%">` +
         `<stop offset="0%" stop-color="rgba(255,255,255,.95)"/>` +
@@ -90,20 +90,20 @@ export default function WordCloud({ words }: { words: Word[] }) {
       const linesG = document.createElementNS(NS, 'g');
       svg.appendChild(linesG);
       const glow = document.createElementNS(NS, 'circle');
-      glow.setAttribute('cx', String(cx)); glow.setAttribute('cy', String(cy));
+      glow.setAttribute('cx', String(c)); glow.setAttribute('cy', String(c));
       glow.setAttribute('r', String(Math.round(radius * 0.36)));
       glow.setAttribute('fill', 'url(#coreG)'); glow.setAttribute('class', 'core-glow');
       svg.appendChild(glow);
       const dot = document.createElementNS(NS, 'circle');
-      dot.setAttribute('cx', String(cx)); dot.setAttribute('cy', String(cy)); dot.setAttribute('r', '5');
+      dot.setAttribute('cx', String(c)); dot.setAttribute('cy', String(c)); dot.setAttribute('r', '5');
       dot.setAttribute('fill', 'rgba(110,130,180,.85)');
       svg.appendChild(dot);
-      el.insertBefore(svg, el.firstChild); // ワードの背面に
+      el.insertBefore(svg, el.firstChild); // ワードの背面
 
-      const items = Array.from(el.querySelectorAll('.tagcloud--item')) as HTMLElement[];
-      const lines = items.map(() => {
+      const its: any[] = (tc as any).items || [];
+      const lines = its.map(() => {
         const ln = document.createElementNS(NS, 'line');
-        ln.setAttribute('x1', String(cx)); ln.setAttribute('y1', String(cy));
+        ln.setAttribute('x1', String(c)); ln.setAttribute('y1', String(c));
         ln.setAttribute('stroke', 'rgb(95,108,140)'); ln.setAttribute('stroke-width', '1');
         linesG.appendChild(ln);
         return ln;
@@ -111,16 +111,16 @@ export default function WordCloud({ words }: { words: Word[] }) {
 
       const tick = () => {
         if (cancelled) return;
-        const cr = el.getBoundingClientRect();
-        items.forEach((it, i) => {
-          const r = it.getBoundingClientRect();
-          const x = r.left + r.width / 2 - cr.left;
-          const y = r.top + r.height / 2 - cr.top;
-          const ln = lines[i];
-          ln.setAttribute('x2', x.toFixed(1)); ln.setAttribute('y2', y.toFixed(1));
-          const op = parseFloat(it.style.opacity || '1');
-          ln.setAttribute('stroke-opacity', (op * op * 0.22).toFixed(3)); // 奥は薄く
-        });
+        const cur: any[] = (tc as any).items || [];
+        for (let i = 0; i < lines.length && i < cur.length; i++) {
+          const item = cur[i];
+          const x = c + item.x; // ワードの中心 ＝ 球中心 + item.x
+          const y = c + item.y;
+          lines[i].setAttribute('x2', x.toFixed(1));
+          lines[i].setAttribute('y2', y.toFixed(1));
+          const op = parseFloat(item.el?.style.opacity || '1');
+          lines[i].setAttribute('stroke-opacity', (op * op * 0.22).toFixed(3)); // 奥は薄く
+        }
         rafId = requestAnimationFrame(tick);
       };
       rafId = requestAnimationFrame(tick);
