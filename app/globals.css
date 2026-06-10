@@ -641,3 +641,8 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 
 /* 個人の振り返り 発表ビュー：大きめで読みやすいテキスト */
 .present-text { font-size: 18px; line-height: 1.9; margin-top: 12px; white-space: pre-wrap; color: var(--fg); font-weight: 500; }
+
+/* エントリーカード：REMOTE/ONSITEラベルと文言を必ず改行（縦積み）に */
+.entry-card .et { display: flex; flex-direction: column; }
+.entry-card .et .k { display: block; }
+.entry-card .et .v { display: block; line-height: 1.35; }
