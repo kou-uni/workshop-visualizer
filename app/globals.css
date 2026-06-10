@@ -530,3 +530,9 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 
 /* app-only：マイクボタンの文字起こし中スピナー（濃色） */
 .mic-spin { width: 14px; height: 14px; border: 2px solid var(--border-strong); border-top-color: var(--fg); border-radius: 50%; display: inline-block; animation: spin .7s linear infinite; }
+
+/* 3D 回転スフィア・ワードクラウド（TagCloud） */
+.cloud3d { position: relative; width: 100%; min-height: 0; overflow: visible; }
+.cloud3d .tagcloud { width: 100%; }
+.cloud3d .tagcloud--item { cursor: grab; user-select: none; line-height: 1; transition: color .2s ease; }
+.cloud3d .tagcloud--item:hover { color: var(--minta) !important; }
