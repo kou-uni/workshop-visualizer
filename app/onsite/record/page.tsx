@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
 const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+const SEGMENT_MS = 45000; // 45秒ごとに区切って逐次文字起こし（長尺・上限・タイムアウト対策）
 const FB = [
   { n: 1, label: 'プロダクトの簡単な紹介', ph: '誰に何を作っている？　例：社会人向けの学習記録アプリ' },
   { n: 2, label: 'つまずいた点 ＋ 乗り越えた話', ph: 'どこで詰まり、どう抜けた？　例：環境変数でハマり、Secret設定を直した' },
@@ -20,18 +21,21 @@ export default function OnsiteRecord() {
   const [fbOpen, setFbOpen] = useState(false);
   const [fb, setFb] = useState<string[]>(['', '', '', '']);
 
-  const [recState, setRecState] = useState<'idle' | 'recording' | 'done' | 'transcribing'>('idle');
+  const [recState, setRecState] = useState<'idle' | 'recording' | 'done'>('idle');
   const [sec, setSec] = useState(0);
-  const [audioUrl, setAudioUrl] = useState('');
-  const [note, setNote] = useState('');
   const [transcript, setTranscript] = useState('');
+  const [segBusy, setSegBusy] = useState(false);
+  const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
 
-  const mrRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
+  const recordingRef = useRef(false);
   const streamRef = useRef<MediaStream | null>(null);
-  const ivRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mrRef = useRef<MediaRecorder | null>(null);
+  const segTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const transcriptRef = useRef('');
+  const pendingRef = useRef(0); // 文字起こし未完のセグメント数
 
   const setMember = (i: number, v: string) => {
     const next = [...members];
@@ -40,53 +44,70 @@ export default function OnsiteRecord() {
     setMembers(next);
   };
 
-  const start = async () => {
-    setSec(0); setAudioUrl(''); setNote(''); setTranscript(''); chunksRef.current = [];
+  const transcribeSegment = async (blob: Blob) => {
+    pendingRef.current += 1; setSegBusy(true);
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const mr = new MediaRecorder(stream);
-      mr.ondataavailable = (e) => { if (e.data?.size) chunksRef.current.push(e.data); };
-      mr.onstop = onStop;
-      mr.start();
-      mrRef.current = mr;
+      const fd = new FormData();
+      fd.append('audio', blob, 'seg.webm');
+      const res = await fetch('/api/transcribe', { method: 'POST', body: fd });
+      const j = await res.json();
+      if (res.ok && j.text) {
+        transcriptRef.current = (transcriptRef.current + ' ' + j.text).trim();
+        setTranscript(transcriptRef.current);
+      }
+    } catch { /* セグメント単位の失敗は無視して継続 */ }
+    finally { pendingRef.current = Math.max(0, pendingRef.current - 1); setSegBusy(pendingRef.current > 0); }
+  };
+
+  const startSegment = () => {
+    const stream = streamRef.current;
+    if (!stream) return;
+    let mr: MediaRecorder;
+    try { mr = new MediaRecorder(stream, { audioBitsPerSecond: 48000 }); } // 低ビットレートでセグメントを小さく
+    catch { mr = new MediaRecorder(stream); }
+    const chunks: Blob[] = [];
+    mr.ondataavailable = (e) => { if (e.data?.size) chunks.push(e.data); };
+    mr.onstop = () => {
+      if (chunks.length) transcribeSegment(new Blob(chunks, { type: chunks[0].type || 'audio/webm' }));
+      if (recordingRef.current) startSegment(); // 次のセグメントへ（録音は途切れさせない）
+      else finalizeStop();
+    };
+    mr.start();
+    mrRef.current = mr;
+    segTimeoutRef.current = setTimeout(() => { if (mr.state === 'recording') mr.stop(); }, SEGMENT_MS);
+  };
+
+  const start = async () => {
+    setErr(''); setNote(''); setTranscript(''); transcriptRef.current = ''; setSec(0);
+    try {
+      streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch {
-      // マイク不可 → 録音風カウントのみ（提出はテキストフォールバックで）
-      mrRef.current = null;
+      setNote('マイクが使えませんでした。「うまく録音できない場合」からテキストで提出してください。');
+      setFbOpen(true);
+      return;
     }
+    recordingRef.current = true;
     setRecState('recording');
-    ivRef.current = setInterval(() => setSec((s) => s + 1), 1000);
+    elapsedRef.current = setInterval(() => setSec((s) => s + 1), 1000);
+    startSegment();
   };
 
   const stop = () => {
-    if (ivRef.current) clearInterval(ivRef.current);
-    if (mrRef.current && mrRef.current.state !== 'inactive') {
-      mrRef.current.stop();
-      setRecState('transcribing');
-    } else {
-      setNote('（マイクが使えませんでした）テキスト入力で提出してください');
-      setRecState('done');
-    }
+    recordingRef.current = false;
+    if (segTimeoutRef.current) clearTimeout(segTimeoutRef.current);
+    if (elapsedRef.current) clearInterval(elapsedRef.current);
+    const mr = mrRef.current;
+    if (mr && mr.state === 'recording') mr.stop(); // 最終セグメント → onstop → finalize
+    else finalizeStop();
   };
 
-  const onStop = async () => {
+  const finalizeStop = () => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
-    const blob = new Blob(chunksRef.current, { type: chunksRef.current[0]?.type || 'audio/webm' });
-    setAudioUrl(URL.createObjectURL(blob));
-    setNote('▶ 再生して、ちゃんと録れているか確認してください');
-    setRecState('transcribing');
-    try {
-      const fd = new FormData();
-      fd.append('audio', blob, 'rec.webm');
-      const res = await fetch('/api/transcribe', { method: 'POST', body: fd });
-      const j = await res.json();
-      if (res.ok) { setTranscript(j.text || ''); setNote('▶ 再生で確認 ／ 文字起こし完了 — 提出できます'); }
-      else setNote('文字起こしに失敗。再生で確認のうえ、必要ならテキストで補足してください');
-    } catch { setNote('文字起こしに失敗。テキストで提出してください'); }
     setRecState('done');
+    setNote('文字起こしの仕上げ中…（数秒）。文字が出そろったら提出できます。');
   };
 
-  const reRecord = () => { setAudioUrl(''); setTranscript(''); start(); };
+  const reRecord = () => { setTranscript(''); transcriptRef.current = ''; start(); };
 
   const submit = async (text: string) => {
     if (!name.trim()) { setErr('チーム名を入力してください'); return; }
@@ -106,6 +127,8 @@ export default function OnsiteRecord() {
     submit(text);
   };
 
+  const canSubmit = recState === 'done' && !segBusy && !!transcript.trim();
+
   return (
     <div className="device">
       <div className="notch" />
@@ -120,7 +143,7 @@ export default function OnsiteRecord() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
           </Link>
         </header>
-        <p style={{ fontSize: 12, color: 'var(--fg-3)', margin: '4px 2px 0' }}>代表者のスマホで実施してください。</p>
+        <p style={{ fontSize: 12, color: 'var(--fg-3)', margin: '4px 2px 0' }}>代表者のスマホで実施してください。録音中、文字起こしがリアルタイムで進みます（長時間OK）。</p>
 
         {/* 録音できない場合のテキストフォーム（アコーディオン） */}
         <button className={`accordion-toggle ${fbOpen ? 'open' : ''}`} style={{ marginTop: 14 }} onClick={() => setFbOpen((o) => !o)}>
@@ -161,28 +184,24 @@ export default function OnsiteRecord() {
           <div className="wave" style={{ display: recState === 'recording' ? 'flex' : 'none' }}>
             {Array.from({ length: 10 }).map((_, i) => <i key={i} style={{ animationDelay: `${i * 0.08}s` }} />)}
           </div>
-          <div className="tiny muted" style={{ marginTop: 8 }}>録音 · AI文字起こし</div>
-
-          {(recState === 'done' || recState === 'transcribing') && (
-            <div style={{ marginTop: 14 }}>
-              <div className="eyebrow" style={{ display: 'block', marginBottom: 8 }}>録音を確認</div>
-              {audioUrl && <audio controls style={{ width: '100%' }} src={audioUrl} />}
-              <div className="tiny muted" style={{ marginTop: 6 }}>{recState === 'transcribing' ? '文字起こし中…' : note}</div>
-              <button className="btn btn-block" style={{ marginTop: 10 }} onClick={reRecord}>録り直す</button>
-            </div>
-          )}
+          <div className="tiny muted" style={{ marginTop: 8 }}>
+            {recState === 'recording' ? (segBusy ? '文字起こし中…（45秒ごとに逐次）' : '録音 · 文字起こし進行中') : '録音 · AI文字起こし'}
+          </div>
+          {recState === 'done' && <button className="btn btn-block" style={{ marginTop: 14 }} onClick={reRecord}>録り直す</button>}
         </div>
 
-        {transcript && (
+        {(recState !== 'idle' && (transcript || note)) && (
           <div className="card" style={{ padding: '14px 16px', background: 'var(--gray-100)' }}>
-            <span className="eyebrow" style={{ display: 'block', marginBottom: 6 }}>文字起こし結果（この内容で分析します）</span>
-            <div style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg)' }}>{transcript}</div>
+            <span className="eyebrow" style={{ display: 'block', marginBottom: 6 }}>文字起こし（この内容で分析します）{segBusy && ' · 仕上げ中…'}</span>
+            <div style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--fg)', maxHeight: 200, overflowY: 'auto' }}>
+              {transcript || <span className="muted">{recState === 'recording' ? '話し始めると、ここに文字が出てきます…' : note}</span>}
+            </div>
           </div>
         )}
 
         {err && <p className="tiny" style={{ color: 'var(--minta)', marginBottom: 10 }}>{err}</p>}
-        <button className="btn btn-primary btn-block" disabled={busy || !transcript.trim()} style={{ opacity: transcript.trim() ? 1 : 0.5 }} onClick={() => submit(transcript)}>
-          {busy ? <><span className="btn-spin" /> 提出中…（アップロード）</> : '提出'}
+        <button className="btn btn-primary btn-block" disabled={busy || !canSubmit} style={{ opacity: canSubmit ? 1 : 0.5 }} onClick={() => submit(transcript)}>
+          {busy ? <><span className="btn-spin" /> 提出中…（アップロード）</> : segBusy && recState === 'done' ? '文字起こし仕上げ中…' : '提出'}
         </button>
       </div>
     </div>
