@@ -37,7 +37,7 @@ export default function RemoteResult() {
             <span className="eyebrow">REMOTE-2 · 結果確認</span>
             <h1 style={{ fontSize: 34, marginTop: 6 }}>みんなの振り返り、いま全体像</h1>
           </div>
-          <button className="btn btn-lg" onClick={load} disabled={loading}>
+          <button className="btn btn-primary btn-lg" onClick={load} disabled={loading}>
             {loading ? '更新中…' : '最新に更新'}
           </button>
         </div>

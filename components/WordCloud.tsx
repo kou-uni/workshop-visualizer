@@ -53,7 +53,7 @@ export default function WordCloud({ words }: { words: Word[] }) {
       const H = Math.round(Math.max(340, Math.min(600, W * 0.62)));
       el.style.height = H + 'px';
       el.style.minHeight = H + 'px';
-      const SIZE: Record<number, number> = { 5: Math.min(72, W / 14), 4: W / 22, 3: W / 34, 2: W / 52, 1: W / 80 };
+      const SIZE: Record<number, number> = { 5: Math.min(104, W / 11), 4: W / 17, 3: W / 27, 2: W / 42, 1: W / 64 };
 
       el.innerHTML = '';
       const svg = select(el).append('svg').attr('class', 'cloud-svg')
@@ -94,10 +94,10 @@ export default function WordCloud({ words }: { words: Word[] }) {
       }
 
       sim = forceSimulation([] as any)
-        .force('x', forceX(0).strength(0.072))
-        .force('y', forceY(0).strength(0.095))
-        .force('charge', forceManyBody().strength(-8))
-        .force('collide', forceCollide((d: any) => d.r).strength(1).iterations(6))
+        .force('x', forceX(0).strength(0.1 * (H / W)))
+        .force('y', forceY(0).strength(0.1))
+        .force('charge', forceManyBody().strength(-10))
+        .force('collide', forceCollide((d: any) => d.r).strength(1).iterations(5))
         .velocityDecay(0.8).alphaDecay(0.02).on('tick', ticked);
 
       function render() {
