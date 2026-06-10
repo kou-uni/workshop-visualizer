@@ -53,7 +53,7 @@ export default function WordCloud({ words }: { words: Word[] }) {
       if (cancelled || !el) return;
 
       const W = Math.max(el.clientWidth, 300);
-      const radius = Math.round(Math.min(W * 0.46, 420));
+      const radius = Math.round(Math.min(W * 0.42, 400));
       el.innerHTML = '';
 
       const texts = words.map((w) => w.keyword);

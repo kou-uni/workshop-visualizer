@@ -17,7 +17,7 @@ export default function AggregationView({ result }: { result: AggregationResult 
       </div>
 
       {result.wordCloud?.length > 0 && (
-        <div className="card" style={{ marginTop: 16, padding: '12px 8px' }}>
+        <div className="card" style={{ marginTop: 16, padding: '12px 8px', display: 'flex', justifyContent: 'center', overflow: 'hidden' }}>
           <WordCloud words={result.wordCloud} />
         </div>
       )}
