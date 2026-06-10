@@ -5,6 +5,7 @@ import BackButton from '@/components/BackButton';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import AgentConversation from '@/components/AgentConversation';
+import MintaBusy from '@/components/MintaBusy';
 import type { AggregationResult } from '@/lib/types';
 
 type Team = { name: string; members: string[] };
@@ -79,7 +80,7 @@ export default function TeamResult() {
             : <p className="tiny muted" style={{ lineHeight: 1.7 }}>「spark &amp; minta と話す」を押すと、録音から議論の概要（どんな議論だったか）をまとめます。</p>}
         </div>
 
-        {err && <p className="tiny" style={{ color: 'var(--minta)', marginTop: 10 }}>{err}</p>}
+        {err && <MintaBusy />}
 
         {!talkStarted ? (
           <div className="talk-cta" id="talkCta">

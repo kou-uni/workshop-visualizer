@@ -4,6 +4,7 @@ import Link from 'next/link';
 import BackButton from '@/components/BackButton';
 import { useEffect, useState } from 'react';
 import AggregationView from '@/components/AggregationView';
+import MintaBusy from '@/components/MintaBusy';
 import type { AggregationResult } from '@/lib/types';
 
 export default function RemoteAdmin() {
@@ -48,7 +49,7 @@ export default function RemoteAdmin() {
           </button>
         </div>
         {updatedAt && <p className="tiny muted" style={{ marginTop: 6 }}>最終集約 {new Date(updatedAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</p>}
-        {err && <p className="tiny" style={{ color: 'var(--minta)', marginTop: 6 }}>{err}</p>}
+        {err && <MintaBusy />}
 
         {!result ? (
           <div className="card" style={{ marginTop: 24, textAlign: 'center', padding: '60px 20px' }}>
