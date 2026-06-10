@@ -49,8 +49,6 @@ export default function TeamResult() {
     } catch (e: any) { setErr(e.message); } finally { setRunning(false); }
   };
 
-  const memberItems = (result?.members?.length ? result.members : (team?.members ?? []).map((name) => ({ name, summary: '' })));
-
   return (
     <div className="device">
       <div className="notch" />
@@ -72,11 +70,10 @@ export default function TeamResult() {
         </div>
 
         <div className="card" style={{ marginTop: 16 }}>
-          <span className="eyebrow" style={{ display: 'block', marginBottom: 8 }}>メンバーそれぞれの持ち寄り</span>
-          <div>
-            {memberItems.length === 0 && <p className="tiny muted">メンバーが登録されていません。</p>}
-            {memberItems.map((m, i) => <Macc key={i} name={m.name} summary={m.summary} analyzed={!!result} />)}
-          </div>
+          <span className="eyebrow" style={{ display: 'block', marginBottom: 8 }}>議論のサマリ</span>
+          {result?.discussionSummary
+            ? <p style={{ fontSize: 14, lineHeight: 1.85 }}>{result.discussionSummary}</p>
+            : <p className="tiny muted" style={{ lineHeight: 1.7 }}>「spark &amp; minta と話す」を押すと、録音から議論の概要（どんな議論だったか）をまとめます。</p>}
         </div>
 
         {err && <p className="tiny" style={{ color: 'var(--minta)', marginTop: 10 }}>{err}</p>}
@@ -103,22 +100,3 @@ export default function TeamResult() {
   );
 }
 
-function Macc({ name, summary, analyzed }: { name: string; summary: string; analyzed: boolean }) {
-  const [open, setOpen] = useState(false);
-  const headNote = summary || (analyzed ? '（個別の持ち寄りは特定できず）' : '「spark & minta と話す」で分析');
-  const bodyText = summary || (analyzed
-    ? '録音からは、この人の個別の持ち寄りを特定できませんでした（チーム全体の結果は下に表示されます）。'
-    : '「spark & minta と話す」を押すと、録音からこの人の持ち寄りを抽出します。');
-  return (
-    <div className="macc">
-      <button className={`macc-head ${open ? 'open' : ''}`} onClick={() => setOpen((o) => !o)}>
-        <span className="rank mono-rank">{name.slice(0, 1)}</span>
-        <span className="mh"><span className="t">{name}</span><span className="e">{headNote}</span></span>
-        <svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
-      </button>
-      <div className={`macc-body ${open ? 'open' : ''}`}>
-        <div className="inner">{bodyText}</div>
-      </div>
-    </div>
-  );
-}

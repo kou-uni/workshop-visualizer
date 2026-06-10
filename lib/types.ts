@@ -16,7 +16,7 @@ export interface AggregationResult {
     spark: AgentInterpretation;
     minta: AgentInterpretation;
   };
-  members: { name: string; summary: string }[]; // チーム集約時：各メンバーの持ち寄り（transcriptから抽出）。他scopeは空配列
+  discussionSummary: string; // 議論の概要（300字程度）。どんな議論だったか・主に何が話されたか
 }
 
 export interface AgentInterpretation {

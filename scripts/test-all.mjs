@@ -125,13 +125,13 @@ await T('T17', 'チーム作成＋一覧', async () => {
   assert((list.teams || []).some((t) => t.id === j.id), '一覧に出ない');
 });
 
-await T('T18', 'transcript保存→team集約→メンバー持ち寄り', async () => {
+await T('T18', 'transcript保存→team集約→議論サマリ', async () => {
   const tid = globalThis.__tid;
-  await post(`/api/teams/${tid}/transcript`, { transcript: 'たろうは環境変数で詰まったがSecretで解決。みさきは要件が曖昧で手が止まると話した。' });
+  await post(`/api/teams/${tid}/transcript`, { transcript: '環境変数で詰まったがSecretで解決。要件が曖昧で手が止まる話や、話者分離の難しさも議論した。' });
   const r = await post('/api/aggregate', { scope: 'team', teamId: tid });
   const j = await r.json(); assert(r.ok, `team集約失敗 ${JSON.stringify(j)}`);
   assert((j.result.wordCloud || []).length > 0, 'team雲が空');
-  assert(Array.isArray(j.result.members), 'members無し');
+  assert(typeof j.result.discussionSummary === 'string' && j.result.discussionSummary.length > 30, '議論サマリが無い/短い');
 });
 
 await T('T19', 'real集約・merged集約', async () => {
@@ -156,10 +156,10 @@ await T('T22', '全画面に「戻る」ボタン', async () => {
   }
 });
 
-await T('T23', 'interpretations は {reads,question}＋members', async () => {
+await T('T23', 'interpretations は {reads,question}＋議論サマリ', async () => {
   const x = (await (await post('/api/aggregate', { scope: 'online' })).json()).result;
   assert(Array.isArray(x.interpretations.spark.reads) && typeof x.interpretations.spark.question === 'string', 'spark形不正');
-  assert(Array.isArray(x.members), 'members無し');
+  assert(typeof x.discussionSummary === 'string', '議論サマリ無し');
 });
 
 // 後片付け（当日のテストデータを一掃）
