@@ -17,13 +17,17 @@ export async function POST(req: Request) {
   const context = String(body?.context ?? '');
   if (!answer) return NextResponse.json({ error: '回答が空です' }, { status: 400 });
 
-  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const completion = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
-    messages: [
-      { role: 'system', content: `${PERSONA[who]} 相手の回答に1〜2文で、共感＋具体的な次の一歩を添えてあたたかく返す。絵文字は控えめに。` },
-      { role: 'user', content: `あなたの問いかけ:「${question}」\n相手の回答:「${answer}」\n参考（全体傾向）:「${context.slice(0, 280)}」\nこの回答にひとこと返して。` },
-    ],
-  });
-  return NextResponse.json({ reply: completion.choices[0].message.content ?? '' });
+  try {
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, maxRetries: 5, timeout: 50000 });
+    const completion = await client.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: `${PERSONA[who]} 相手の回答に1〜2文で、共感＋具体的な次の一歩を添えてあたたかく返す。絵文字は控えめに。` },
+        { role: 'user', content: `あなたの問いかけ:「${question}」\n相手の回答:「${answer}」\n参考（全体傾向）:「${context.slice(0, 280)}」\nこの回答にひとこと返して。` },
+      ],
+    });
+    return NextResponse.json({ reply: completion.choices[0].message.content ?? '' });
+  } catch (e: any) {
+    return NextResponse.json({ error: typeof e?.message === 'string' ? e.message : 'AI応答に失敗しました' }, { status: 500 });
+  }
 }
