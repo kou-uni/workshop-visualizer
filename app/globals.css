@@ -520,3 +520,10 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 .ask-turn { margin-top: 11px; }
 .ask-you { font-size: 13px; font-weight: 600; background: var(--bg); border: 1px solid var(--border); border-radius: 10px 10px 10px 3px; padding: 8px 12px; display: inline-block; }
 .ask-turn .ask-reply { margin-top: 8px; }
+
+/* app-only：トップで参加形態をタップ → 行き先セクションを一瞬ハイライト */
+.track { border-radius: 16px; }
+.track.flash { animation: trackFlash 1.3s ease; }
+@keyframes trackFlash { 0% { background: rgba(255,0,128,.10); } 100% { background: transparent; } }
+.track.flash .track-head .tnum { animation: tnumFlash 1.3s ease; }
+@keyframes tnumFlash { 0%, 40% { color: var(--minta); } 100% { color: var(--fg-3); } }
