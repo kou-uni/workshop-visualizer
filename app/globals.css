@@ -557,3 +557,10 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 .chat-minta { background: var(--minta); border-bottom-right-radius: 4px; align-self: flex-end; box-shadow: 0 8px 20px -8px rgba(255,0,128,.5); }
 @keyframes chatPop { 0% { opacity: 0; transform: translateY(12px) scale(.85); } 100% { opacity: 1; transform: none; } }
 @keyframes chatFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+/* ONSITE-2 議論吹き出し：spark=水色／minta=ピンク＋しっぽ（上書き） */
+.chat-pop { position: relative; }
+.chat-pop::after { content: ""; position: absolute; bottom: -4px; width: 12px; height: 12px; transform: rotate(45deg); border-radius: 3px; }
+.chat-spark { background: #29b6e8; box-shadow: 0 8px 20px -8px rgba(41,182,232,.5); }
+.chat-spark::after { left: 16px; background: #29b6e8; }
+.chat-minta::after { right: 16px; background: var(--minta); }
