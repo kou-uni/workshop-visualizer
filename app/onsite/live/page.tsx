@@ -22,6 +22,10 @@ export default function OnsiteLive() {
   useEffect(() => {
     loadTeams();
     fetch('/api/aggregation?scope=real').then((r) => r.json()).then((j) => { if (j.result) setResult(j.result); }).catch(() => {});
+    // ONSITE-2（チームの振り返り）から来たら、チーム選択タイルへスクロール
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('to') === 'teams') {
+      setTimeout(() => teamsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 500);
+    }
   }, []);
 
   const run = async () => {

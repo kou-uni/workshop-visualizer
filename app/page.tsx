@@ -10,7 +10,7 @@ const ONLINE_TILES = [
 ];
 const REAL_TILES = [
   { k: 'ONSITE-1', n: '振り返り録音（代表者）', d: 'チームの議論を代表者が録音して、提出する', href: '/onsite/record' },
-  { k: 'ONSITE-2', n: 'チームの振り返り', d: 'AIがチームの議論を分析し、振り返りを返す', href: '/onsite/live' },
+  { k: 'ONSITE-2', n: 'チームの振り返り', d: 'チームを選んで、AIの振り返りを見る', href: '/onsite/live?to=teams' },
   { k: 'ONSITE-3', n: '全体集計（投影）', d: 'ONSITE全体をまとめて、会場に映す', href: '/onsite/live' },
 ];
 
