@@ -89,7 +89,7 @@ export default function RemoteInput() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
             </Link>
             <Link href="/" className="logo-dot">8</Link>
-            <span className="app-head-title">第7回振り返り（個人作業）</span>
+            <span className="app-head-title">これまでの振り返り（個人作業）</span>
             <span className="badge badge-gray" style={{ fontSize: 10, padding: '3px 8px' }}>REMOTE-1</span>
           </div>
         </header>
