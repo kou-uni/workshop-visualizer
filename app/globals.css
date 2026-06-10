@@ -504,3 +504,8 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 
 /* app-only layout helper（ヘッダ行：見出し＋ボタン） */
 .screen-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 4px; }
+
+/* app-only：エージェント縦積み（スマホ縦画面用）＋ ボタン内スピナー */
+.agent-stack { display: grid; grid-template-columns: 1fr; gap: 14px; }
+.btn-spin { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.45); border-top-color: #fff; border-radius: 50%; display: inline-block; animation: spin .7s linear infinite; vertical-align: -2px; }
+.btn:not(.btn-primary):not(.btn-blue) .btn-spin { border-color: var(--border-strong); border-top-color: var(--fg); }

@@ -5,7 +5,7 @@ import Typewriter from './Typewriter';
 import type { AggregationResult, AgentInterpretation } from '@/lib/types';
 
 // spark/minta 会話モジュール：「話す」→ くるくる → 読み解き → Q&A（1往復・AI返信）
-export default function AgentConversation({ result, autoStart = false }: { result: AggregationResult; autoStart?: boolean }) {
+export default function AgentConversation({ result, autoStart = false, stacked = false }: { result: AggregationResult; autoStart?: boolean; stacked?: boolean }) {
   const [phase, setPhase] = useState<'cta' | 'analyzing' | 'revealed'>(autoStart ? 'analyzing' : 'cta');
   const context = result.trendSummary || '';
 
@@ -38,7 +38,7 @@ export default function AgentConversation({ result, autoStart = false }: { resul
   }
 
   return (
-    <div className="grid-2">
+    <div className={stacked ? 'agent-stack' : 'grid-2'}>
       <AgentCard who="spark" lens="技術 / アーキ" data={result.interpretations.spark} context={context} />
       <AgentCard who="minta" lens="要件 / 価値 / UX" data={result.interpretations.minta} context={context} />
     </div>

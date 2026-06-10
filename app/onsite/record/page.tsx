@@ -136,7 +136,7 @@ export default function OnsiteRecord() {
                 <textarea className="textarea" placeholder={f.ph} value={fb[i]} onChange={(e) => setFb((v) => { const n = [...v]; n[i] = e.target.value; return n; })} />
               </div>
             ))}
-            <button className="btn btn-primary btn-block" onClick={submitFallback} disabled={busy}>テキストで提出</button>
+            <button className="btn btn-primary btn-block" onClick={submitFallback} disabled={busy}>{busy ? <><span className="btn-spin" /> 送信中…</> : 'テキストで提出'}</button>
           </div>
         </div>
 
@@ -173,8 +173,17 @@ export default function OnsiteRecord() {
           )}
         </div>
 
+        {transcript && (
+          <div className="card" style={{ padding: '14px 16px', background: 'var(--gray-100)' }}>
+            <span className="eyebrow" style={{ display: 'block', marginBottom: 6 }}>文字起こし結果（この内容で分析します）</span>
+            <div style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--fg)' }}>{transcript}</div>
+          </div>
+        )}
+
         {err && <p className="tiny" style={{ color: 'var(--minta)', marginBottom: 10 }}>{err}</p>}
-        <button className="btn btn-primary btn-block" disabled={busy || !transcript.trim()} style={{ opacity: transcript.trim() ? 1 : 0.5 }} onClick={() => submit(transcript)}>提出</button>
+        <button className="btn btn-primary btn-block" disabled={busy || !transcript.trim()} style={{ opacity: transcript.trim() ? 1 : 0.5 }} onClick={() => submit(transcript)}>
+          {busy ? <><span className="btn-spin" /> アップロード中…</> : '提出'}
+        </button>
       </div>
     </div>
   );
