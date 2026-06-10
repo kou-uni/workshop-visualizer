@@ -605,3 +605,31 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 /* spark/minta agent アイコンを 水色○(spark)／ピンク○(minta) に統一（全画面共通＝AgentConversation） */
 .agent.spark .avatar { background: #29b6e8; border-color: #29b6e8; color: #fff; border-radius: 50%; }
 .agent.minta .avatar { background: var(--minta); border-color: var(--minta); color: #fff; border-radius: 50%; }
+
+/* 左上ロゴ＆favicon：web3/AI概論のペンギン（public/logo.png を配置） */
+.logo-dot {
+  background: url('/logo.png') center / contain no-repeat !important;
+  width: 30px; height: 26px;
+  border-radius: 0 !important;
+  font-size: 0 !important;
+  color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* チーム選択タイル（クール・25件並んでも整う） */
+.team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(244px, 1fr)); gap: 12px; }
+.team-tile2 { display: flex; align-items: center; gap: 14px; padding: 15px 16px; border-radius: var(--radius); text-decoration: none; color: inherit;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  background-color: rgba(255,255,255,.55); background-image: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,0) 60%);
+  backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(80,68,54,.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 2px 8px rgba(35,28,20,.04), 0 18px 40px -28px rgba(35,28,20,.22); }
+.team-tile2:hover { transform: translateY(-3px); box-shadow: inset 0 1px 0 rgba(255,255,255,.95), 0 8px 16px rgba(35,28,20,.06), 0 30px 56px -26px rgba(35,28,20,.30); }
+.tt2-badge { width: 44px; height: 44px; flex: none; border-radius: 12px; color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 20px; font-weight: 500; box-shadow: 0 8px 18px -8px rgba(35,28,20,.4); }
+.tt2-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.tt2-name { font-weight: 600; font-size: 15px; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tt2-meta { font-size: 11px; color: var(--fg-3); font-family: var(--mono); margin-top: 4px; display: flex; align-items: center; gap: 6px; letter-spacing: .02em; }
+.tt2-dot { width: 6px; height: 6px; flex: none; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px var(--green-light); }
+.tt2-arrow { flex: none; color: var(--fg-3); transition: .18s; display: flex; }
+.tt2-arrow svg { width: 18px; height: 18px; }
+.team-tile2:hover .tt2-arrow { color: var(--fg); transform: translateX(3px); }

@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'web3・AI概論 第8回 ワークショップ',
   description: '第8回 振り返り会 — オンライン＆リアル',
+  icons: { icon: '/logo.png', apple: '/logo.png', shortcut: '/logo.png' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
