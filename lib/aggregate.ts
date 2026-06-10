@@ -65,7 +65,9 @@ export async function aggregate(scope: Scope, sessionId: string): Promise<Aggreg
 
   if (inputs.length === 0) inputs.push('（まだ入力がありません）');
 
-  const userContent = inputs.join('\n').slice(0, 60000); // 入力上限（コンテキスト溢れ防止の安全網）
+  // 入力上限：チーム集約は同時多発しやすいのでトークンを絞り、共有TPMの圧を下げる（議論の主要部は十分拾える）
+  const inputCap = scope.kind === 'team' ? 16000 : 60000;
+  const userContent = inputs.join('\n').slice(0, inputCap);
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, maxRetries: 5, timeout: 50000 });
   const completion = await client.chat.completions.create({
     model: 'gpt-4o-mini',
