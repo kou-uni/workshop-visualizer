@@ -7,6 +7,7 @@ import { useRef, useState } from 'react';
 
 const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 const SEGMENT_MS = 20000; // 20秒ごとに区切って逐次文字起こし（長尺・上限・タイムアウト対策）
+const SHOW_RECORD = false; // 「この場で録音」は機能を残したまま非表示（true で再表示）
 const FB = [
   { n: 1, label: 'プロダクトの簡単な紹介', ph: '誰に何を作っている？　例：社会人向けの学習記録アプリ' },
   { n: 2, label: 'つまずいた点 ＋ 乗り越えた話', ph: 'どこで詰まり、どう抜けた？　例：環境変数でハマり、Secret設定を直した' },
@@ -114,6 +115,7 @@ export default function OnsiteRecord() {
 
   const submit = async (text: string) => {
     if (!name.trim()) { setErr('チーム名を入力してください'); return; }
+    if (members.filter((m) => m.trim()).length === 0) { setErr('メンバーを1名以上入力してください'); return; }
     if (!text.trim()) { setErr('いずれかの方法で議論の内容を入力してください'); return; }
     setErr(''); setBusy(true);
     try {
@@ -157,11 +159,11 @@ export default function OnsiteRecord() {
 
         {/* チーム名・メンバー */}
         <div className="field" style={{ marginTop: 16 }}>
-          <label>チーム名 <span className="hint">本日限定、自由記入</span></label>
-          <input className="input" placeholder="チーム名を入力" value={name} onChange={(e) => setName(e.target.value)} />
+          <label>チーム名 <span className="hint">必須・本日限定</span></label>
+          <input className="input" placeholder="チーム名を入力（必須）" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="field">
-          <label>メンバー <span className="hint">（Discord名）・最大7名</span></label>
+          <label>メンバー <span className="hint">（Discord名）・1名以上必須・最大7名</span></label>
           <div id="memberList">
             {members.map((m, i) => (
               <input key={i} className="input member" style={{ marginBottom: 8 }} placeholder="Discord名" value={m} onChange={(e) => setMember(i, e.target.value)} />
@@ -181,7 +183,8 @@ export default function OnsiteRecord() {
           </button>
         </div>
 
-        {/* ② この場で録音 */}
+        {SHOW_RECORD && (<>
+        {/* この場で録音（機能は維持・通常は非表示） */}
         <div className="group-label" style={{ marginTop: 26 }}>② この場で録音 <span className="muted">（20秒ごとに自動文字起こし）</span></div>
         <button className={`accordion-toggle ${recOpen ? 'open' : ''}`} onClick={() => setRecOpen((o) => !o)}>
           <span>このスマホで録音する</span>
@@ -211,9 +214,10 @@ export default function OnsiteRecord() {
             {busy ? <><span className="btn-spin" /> 提出中…</> : segBusy && recState === 'done' ? '文字起こし仕上げ中…' : '録音内容で提出'}
           </button>
         </div>
+        </>)}
 
-        {/* ③ うまく録音できない場合（テキスト入力） */}
-        <div className="group-label" style={{ marginTop: 26 }}>③ うまく録音できない場合 <span className="muted">（テキストで入力）</span></div>
+        {/* うまく録音できない場合（テキスト入力） */}
+        <div className="group-label" style={{ marginTop: 26 }}>{SHOW_RECORD ? '③' : '②'} うまく録音できない場合 <span className="muted">（テキストで入力）</span></div>
         <button className={`accordion-toggle ${fbOpen ? 'open' : ''}`} onClick={() => setFbOpen((o) => !o)}>
           <span>テキストで入力する</span>
           <svg className="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9l6 6 6-6" /></svg>
