@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 
 const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-const SEGMENT_MS = 45000; // 45秒ごとに区切って逐次文字起こし（長尺・上限・タイムアウト対策）
+const SEGMENT_MS = 20000; // 20秒ごとに区切って逐次文字起こし（長尺・上限・タイムアウト対策）
 const FB = [
   { n: 1, label: 'プロダクトの簡単な紹介', ph: '誰に何を作っている？　例：社会人向けの学習記録アプリ' },
   { n: 2, label: 'つまずいた点 ＋ 乗り越えた話', ph: 'どこで詰まり、どう抜けた？　例：環境変数でハマり、Secret設定を直した' },
@@ -79,9 +79,9 @@ export default function OnsiteRecord() {
     };
     mr.start();
     mrRef.current = mr;
-    console.log('[rec] セグメント開始（45秒後に区切ります）');
+    console.log('[rec] セグメント開始（20秒後に区切ります）');
     segTimeoutRef.current = setTimeout(() => {
-      console.log('[rec] 45秒経過 → 区切って文字起こしへ');
+      console.log('[rec] 20秒経過 → 区切って文字起こしへ');
       if (mr.state === 'recording') mr.stop();
     }, SEGMENT_MS);
   };
@@ -194,7 +194,7 @@ export default function OnsiteRecord() {
             {Array.from({ length: 10 }).map((_, i) => <i key={i} style={{ animationDelay: `${i * 0.08}s` }} />)}
           </div>
           <div className="tiny muted" style={{ marginTop: 8 }}>
-            {recState === 'recording' ? (segBusy ? '文字起こし中…（45秒ごとに逐次）' : '録音 · 文字起こし進行中') : '録音 · AI文字起こし'}
+            {recState === 'recording' ? (segBusy ? '文字起こし中…（20秒ごとに逐次）' : '録音 · 文字起こし進行中') : '録音 · AI文字起こし'}
           </div>
           {recState === 'done' && <button className="btn btn-block" style={{ marginTop: 14 }} onClick={reRecord}>録り直す</button>}
         </div>
@@ -202,10 +202,10 @@ export default function OnsiteRecord() {
         {recState !== 'idle' && (
           <div className="card" style={{ padding: '14px 16px', background: 'var(--gray-100)' }}>
             <span className="eyebrow" style={{ display: 'block', marginBottom: 6 }}>
-              文字起こし · 45秒ごとに反映（{segDone}区切り済）{segBusy && ' · 処理中…'}
+              文字起こし · 20秒ごとに反映（{segDone}区切り済）{segBusy && ' · 処理中…'}
             </span>
             <div style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--fg)', maxHeight: 200, overflowY: 'auto' }}>
-              {transcript || <span className="muted">{recState === 'recording' ? '最初の文字起こしは約45秒後に出ます（以降45秒ごとに追記されます）…' : note}</span>}
+              {transcript || <span className="muted">{recState === 'recording' ? '最初の文字起こしは約20秒後に出ます（以降20秒ごとに追記されます）…' : note}</span>}
             </div>
           </div>
         )}
