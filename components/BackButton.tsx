@@ -2,10 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 
-// 1つ前の画面に戻る（履歴が無ければトップへ）
-export default function BackButton() {
+// 1つ前の画面に戻る（href指定時はそこへ固定／履歴が無ければトップへ）
+export default function BackButton({ href }: { href?: string }) {
   const router = useRouter();
   const back = () => {
+    if (href) { router.push(href); return; }
     if (typeof window !== 'undefined' && window.history.length > 1) router.back();
     else router.push('/');
   };

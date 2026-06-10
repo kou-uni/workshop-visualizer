@@ -33,7 +33,7 @@ export default function RemotePerson() {
   return (
     <>
       <div className="topbar">
-        <BackButton /><Link href="/" className="logo-dot">8</Link>
+        <BackButton href="/remote/people" /><Link href="/" className="logo-dot">8</Link>
         <span className="title">{cur?.discord_name ?? '個人の振り返り'}</span>
         <span className="spacer" />
       </div>
