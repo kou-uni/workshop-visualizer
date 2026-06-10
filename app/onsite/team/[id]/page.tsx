@@ -37,7 +37,7 @@ export default function TeamResult() {
         r = j.result as AggregationResult; setResult(r);
       }
       const elapsed = Date.now() - t0;
-      if (elapsed < 4200) await new Promise((res) => setTimeout(res, 4200 - elapsed)); // 議論中の演出を最低4.2秒見せる
+      if (elapsed < 5200) await new Promise((res) => setTimeout(res, 5200 - elapsed)); // 議論中の演出を最低5.2秒見せる（3個ほど）
       setTalkStarted(true);
     } catch (e: any) { setErr(e.message); } finally { setRunning(false); }
   };
@@ -116,15 +116,13 @@ const DISC = [
 function DiscussBubbles() {
   const [n, setN] = useState(0);
   useEffect(() => {
-    const iv = setInterval(() => setN((x) => x + 1), 1000);
+    const iv = setInterval(() => setN((x) => x + 1), 1700); // 1個ずつ・1.7秒で出て消える
     return () => clearInterval(iv);
   }, []);
-  const recent = [n - 2, n - 1, n].filter((i) => i >= 0).map((i) => ({ ...DISC[i % DISC.length], key: i }));
+  const b = DISC[n % DISC.length];
   return (
     <div className="discuss-bubbles">
-      {recent.map((b) => (
-        <div key={b.key} className={`chat-pop chat-${b.who}`}>{b.t}</div>
-      ))}
+      <div key={n} className={`chat-pop chat-${b.who}`}>{b.t}</div>
     </div>
   );
 }
