@@ -65,12 +65,13 @@ export async function aggregate(scope: Scope, sessionId: string): Promise<Aggreg
 
   if (inputs.length === 0) inputs.push('（まだ入力がありません）');
 
+  const userContent = inputs.join('\n').slice(0, 60000); // 入力上限（コンテキスト溢れ防止の安全網）
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const completion = await client.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: inputs.join('\n') },
+      { role: 'user', content: userContent },
     ],
     response_format: { type: 'json_schema', json_schema: { name: 'aggregation', strict: true, schema: SCHEMA as any } },
   });
@@ -102,17 +103,31 @@ async function teamInputs(sb: ReturnType<typeof supabaseAdmin>, teamId: string):
   const { data: team } = await sb.from('teams').select('name,members').eq('id', teamId).maybeSingle();
   if (team) out.push(`【チーム:${team.name}】メンバー:${(team.members ?? []).join('、')}`);
   const { data: recs } = await sb.from('recordings').select('transcript').eq('team_id', teamId);
-  for (const r of recs ?? []) if (r.transcript?.trim()) out.push(`議論の記録:${r.transcript}`);
+  for (const r of recs ?? []) if (r.transcript?.trim()) out.push(`議論の記録:${r.transcript.slice(0, 40000)}`);
   return out;
 }
 
+// real（全体）＝スケール対策の reduce 層：各チームの「事前抽出済み team集約（要約＋キーワード＋つまずき/ハック）」を集める。
+// 生transcriptを丸ごと渡さないので、20チーム×50分でも入力を小さく保てる（map-reduce）。
 async function realInputs(sb: ReturnType<typeof supabaseAdmin>, sessionId: string): Promise<string[]> {
   const out: string[] = [];
   const { data: teams } = await sb.from('teams').select('id,name').eq('session_id', sessionId);
   for (const t of teams ?? []) {
-    const { data: recs } = await sb.from('recordings').select('transcript').eq('team_id', t.id);
-    const txt = (recs ?? []).map((r) => r.transcript).filter((x) => x && x.trim()).join(' ');
-    if (txt.trim()) out.push(`【${t.name}】${txt}`);
+    const { data: agg } = await sb.from('aggregations')
+      .select('result_json').eq('session_id', sessionId).eq('scope', 'team').eq('team_id', t.id)
+      .order('created_at', { ascending: false }).limit(1).maybeSingle();
+    const r = agg?.result_json as AggregationResult | undefined;
+    if (r) {
+      const kws = (r.wordCloud ?? []).slice(0, 12).map((w) => w.keyword).join('、');
+      const st = (r.commonStumbles ?? []).map((s) => s.title).join('、');
+      const hk = (r.hacks ?? []).map((h) => h.title).join('、');
+      out.push(`【${t.name}】要約:${r.discussionSummary ?? ''} / つまずき:${st} / ハック:${hk} / キーワード:${kws}`);
+    } else {
+      // team集約がまだのチームのみ、生transcriptを短縮して使う（フォールバック）
+      const { data: recs } = await sb.from('recordings').select('transcript').eq('team_id', t.id);
+      const txt = (recs ?? []).map((x) => x.transcript).filter((x) => x && x.trim()).join(' ').slice(0, 1500);
+      if (txt.trim()) out.push(`【${t.name}】${txt}`);
+    }
   }
   return out;
 }
