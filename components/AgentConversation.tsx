@@ -14,7 +14,7 @@ const DISC_SCRIPT = [
   { who: 'minta', t: 'いくよ〜！' },
 ];
 
-export default function AgentConversation({ result, autoStart = false, stacked = false, instant = false }: { result: AggregationResult; autoStart?: boolean; stacked?: boolean; instant?: boolean }) {
+export default function AgentConversation({ result, autoStart = false, stacked = false, instant = false, simple = false }: { result: AggregationResult; autoStart?: boolean; stacked?: boolean; instant?: boolean; simple?: boolean }) {
   const [phase, setPhase] = useState<'cta' | 'analyzing' | 'revealed'>(instant ? 'revealed' : autoStart ? 'analyzing' : 'cta');
   const context = result.trendSummary || '';
 
@@ -33,12 +33,22 @@ export default function AgentConversation({ result, autoStart = false, stacked =
     );
   }
 
-  if (phase === 'analyzing') return <Discussing />;
+  if (phase === 'analyzing') return simple ? <SimpleSpin /> : <Discussing />;
 
   return (
     <div className={stacked ? 'agent-stack' : 'grid-2'}>
       <AgentCard who="spark" lens="技術 / アーキ" data={result.interpretations.spark} context={context} />
       <AgentCard who="minta" lens="要件 / 価値 / UX" data={result.interpretations.minta} context={context} />
+    </div>
+  );
+}
+
+// 投影系：シンプルな くるくる だけ
+function SimpleSpin() {
+  return (
+    <div style={{ textAlign: 'center', padding: '44px 0' }}>
+      <div className="spinner" style={{ margin: '0 auto 16px' }} />
+      <div className="eyebrow">spark &amp; minta が読み解いています…</div>
     </div>
   );
 }
