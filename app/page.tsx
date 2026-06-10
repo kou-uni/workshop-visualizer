@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 
 const ONLINE_TILES = [
-  { k: 'REMOTE-1', n: '黙々タイム（入力）', d: '自分のプロダクトを個人で振り返り、提出する', href: '/remote/input' },
+  { k: 'REMOTE-1', n: '黙々タイム（個人作業）', d: '自分のプロダクトを個人で振り返り、提出する', href: '/remote/input' },
   { k: 'REMOTE-2', n: '黙々タイムの結果（sparkにて操作）', d: 'みんなの振り返りをAIが集約した結果を見る', href: '/remote/result' },
-  { k: 'REMOTE-3', n: '気づきメモ（ブレイクアウト中）', d: '話しながら気づいたことを、その場でメモする', href: '/remote/feedback' },
+  { k: 'REMOTE-3', n: '気づきメモ（チーム議論）', d: '話しながら気づいたことを、その場でメモする', href: '/remote/feedback' },
   { k: 'REMOTE-4', n: 'オンライン集約（sparkにて操作）', d: 'オンライン全体をAIで集約し、解釈を映す', href: '/remote/admin' },
 ];
 const REAL_TILES = [
