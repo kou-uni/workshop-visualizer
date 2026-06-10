@@ -140,9 +140,6 @@ export default function OnsiteRecord() {
             <span className="app-head-title">リアル振り返り</span>
             <span className="badge badge-gray" style={{ fontSize: 10, padding: '3px 8px' }}>ONSITE-1</span>
           </div>
-          <Link href="/" className="icon-close" aria-label="close">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
-          </Link>
         </header>
 
         {/* 議論のお題（何を話すか） */}
@@ -174,12 +171,12 @@ export default function OnsiteRecord() {
         {err && <p className="tiny" style={{ color: 'var(--minta)', margin: '4px 0 10px' }}>{err}</p>}
 
         {/* ① 文字起こしを貼り付け（おすすめ） */}
-        <div className="group-label">① 文字起こしを貼り付け <span className="muted">（おすすめ・いちばん確実）</span></div>
+        <div className="group-label">① 文字起こしを貼り付け</div>
         <div className="card" style={{ padding: '16px 18px' }}>
           <p className="tiny muted" style={{ marginBottom: 10, lineHeight: 1.6 }}>iPhoneのボイスメモ等で議論を録音・文字起こしして、その文章をそのまま貼り付け。アプリ側に元データが残るので一番安全です。</p>
           <textarea className="textarea" style={{ minHeight: 120 }} placeholder="文字起こしした議論の内容をここに貼り付け…" value={paste} onChange={(e) => setPaste(e.target.value)} />
           <button className="btn btn-primary btn-block btn-lg" style={{ marginTop: 12 }} disabled={busy || !paste.trim()} onClick={() => submit(paste)}>
-            {busy ? <><span className="btn-spin" /> 送信中…</> : 'この内容でサマリ化する'}
+            {busy ? <><span className="btn-spin" /> 送信中…</> : 'この内容でAIに振り返ってもらう'}
           </button>
         </div>
 
@@ -230,7 +227,7 @@ export default function OnsiteRecord() {
                 <textarea className="textarea" placeholder={f.ph} value={fb[i]} onChange={(e) => setFb((v) => { const n = [...v]; n[i] = e.target.value; return n; })} />
               </div>
             ))}
-            <button className="btn btn-primary btn-block" onClick={submitFallback} disabled={busy}>{busy ? <><span className="btn-spin" /> 送信中…</> : 'テキストで提出'}</button>
+            <button className="btn btn-primary btn-block" onClick={submitFallback} disabled={busy}>{busy ? <><span className="btn-spin" /> 送信中…</> : '提出'}</button>
           </div>
         </div>
       </div>
