@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const ONLINE_TILES = [
   { k: 'REMOTE-1', n: '黙々タイム（入力）', d: '自分のプロダクトを個人で振り返り、提出する', href: '/remote/input' },
@@ -28,6 +28,15 @@ export default function Home() {
     setFlash(which);
     setTimeout(() => setFlash(null), 1300);
   };
+
+  // 他画面から ?to=online / ?to=real で戻ってきたら、その節へスクロール＆ハイライト
+  useEffect(() => {
+    const to = new URLSearchParams(window.location.search).get('to');
+    if (to === 'online' || to === 'real') {
+      setTimeout(() => go(to, to === 'online' ? onlineRef : realRef), 150);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>

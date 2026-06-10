@@ -527,3 +527,6 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 @keyframes trackFlash { 0% { background: rgba(255,0,128,.10); } 100% { background: transparent; } }
 .track.flash .track-head .tnum { animation: tnumFlash 1.3s ease; }
 @keyframes tnumFlash { 0%, 40% { color: var(--minta); } 100% { color: var(--fg-3); } }
+
+/* app-only：マイクボタンの文字起こし中スピナー（濃色） */
+.mic-spin { width: 14px; height: 14px; border: 2px solid var(--border-strong); border-top-color: var(--fg); border-radius: 50%; display: inline-block; animation: spin .7s linear infinite; }
