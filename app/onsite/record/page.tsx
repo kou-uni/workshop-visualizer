@@ -25,6 +25,7 @@ export default function OnsiteRecord() {
   const [sec, setSec] = useState(0);
   const [transcript, setTranscript] = useState('');
   const [segBusy, setSegBusy] = useState(false);
+  const [segDone, setSegDone] = useState(0);
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -54,6 +55,10 @@ export default function OnsiteRecord() {
       if (res.ok && j.text) {
         transcriptRef.current = (transcriptRef.current + ' ' + j.text).trim();
         setTranscript(transcriptRef.current);
+        setSegDone((n) => n + 1);
+        console.log('[rec] セグメント文字起こし反映', { text: j.text });
+      } else {
+        console.warn('[rec] セグメント文字起こし失敗', res.status, j);
       }
     } catch { /* セグメント単位の失敗は無視して継続 */ }
     finally { pendingRef.current = Math.max(0, pendingRef.current - 1); setSegBusy(pendingRef.current > 0); }
@@ -74,11 +79,15 @@ export default function OnsiteRecord() {
     };
     mr.start();
     mrRef.current = mr;
-    segTimeoutRef.current = setTimeout(() => { if (mr.state === 'recording') mr.stop(); }, SEGMENT_MS);
+    console.log('[rec] セグメント開始（45秒後に区切ります）');
+    segTimeoutRef.current = setTimeout(() => {
+      console.log('[rec] 45秒経過 → 区切って文字起こしへ');
+      if (mr.state === 'recording') mr.stop();
+    }, SEGMENT_MS);
   };
 
   const start = async () => {
-    setErr(''); setNote(''); setTranscript(''); transcriptRef.current = ''; setSec(0);
+    setErr(''); setNote(''); setTranscript(''); transcriptRef.current = ''; setSec(0); setSegDone(0);
     try {
       streamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
     } catch {
@@ -190,11 +199,13 @@ export default function OnsiteRecord() {
           {recState === 'done' && <button className="btn btn-block" style={{ marginTop: 14 }} onClick={reRecord}>録り直す</button>}
         </div>
 
-        {(recState !== 'idle' && (transcript || note)) && (
+        {recState !== 'idle' && (
           <div className="card" style={{ padding: '14px 16px', background: 'var(--gray-100)' }}>
-            <span className="eyebrow" style={{ display: 'block', marginBottom: 6 }}>文字起こし（この内容で分析します）{segBusy && ' · 仕上げ中…'}</span>
+            <span className="eyebrow" style={{ display: 'block', marginBottom: 6 }}>
+              文字起こし · 45秒ごとに反映（{segDone}区切り済）{segBusy && ' · 処理中…'}
+            </span>
             <div style={{ fontSize: 13, lineHeight: 1.7, color: 'var(--fg)', maxHeight: 200, overflowY: 'auto' }}>
-              {transcript || <span className="muted">{recState === 'recording' ? '話し始めると、ここに文字が出てきます…' : note}</span>}
+              {transcript || <span className="muted">{recState === 'recording' ? '最初の文字起こしは約45秒後に出ます（以降45秒ごとに追記されます）…' : note}</span>}
             </div>
           </div>
         )}
