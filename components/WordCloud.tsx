@@ -53,7 +53,7 @@ export default function WordCloud({ words }: { words: Word[] }) {
       const H = Math.round(Math.max(340, Math.min(600, W * 0.62)));
       el.style.height = H + 'px';
       el.style.minHeight = H + 'px';
-      const SIZE: Record<number, number> = { 5: Math.min(96, W / 10.5), 4: W / 18, 3: W / 30, 2: W / 48, 1: W / 74 };
+      const SIZE: Record<number, number> = { 5: Math.min(72, W / 14), 4: W / 22, 3: W / 34, 2: W / 52, 1: W / 80 };
 
       el.innerHTML = '';
       const svg = select(el).append('svg').attr('class', 'cloud-svg')
@@ -69,7 +69,7 @@ export default function WordCloud({ words }: { words: Word[] }) {
       nodes.forEach((n) => {
         meas.attr('font-family', n.font).attr('font-weight', n.weight).attr('font-size', n.base).text(n.text);
         const b = (meas.node() as SVGTextElement).getBBox();
-        n.r = Math.max((b.width / 2) * 0.9, b.height / 2) + 5;
+        n.r = Math.max((b.width / 2) * 0.98, b.height / 2) + 8;
       });
       meas.remove();
 
@@ -97,8 +97,8 @@ export default function WordCloud({ words }: { words: Word[] }) {
         .force('x', forceX(0).strength(0.072))
         .force('y', forceY(0).strength(0.095))
         .force('charge', forceManyBody().strength(-8))
-        .force('collide', forceCollide((d: any) => d.r).strength(0.92).iterations(3))
-        .velocityDecay(0.82).alphaDecay(0.022).on('tick', ticked);
+        .force('collide', forceCollide((d: any) => d.r).strength(1).iterations(6))
+        .velocityDecay(0.8).alphaDecay(0.02).on('tick', ticked);
 
       function render() {
         groups = root.selectAll('g.node').data(live, (d: any) => d.text);
@@ -113,14 +113,14 @@ export default function WordCloud({ words }: { words: Word[] }) {
           .subject((ev: any, d: any) => ({ x: d.x, y: d.y }))
           .on('start', function (this: any, ev: any, d: any) { if (!ev.active) sim.alphaTarget(0.32).restart(); d.fx = d.x; d.fy = d.y; select(this).classed('grab', true).raise(); })
           .on('drag', (ev: any, d: any) => { d.fx = ev.x; d.fy = ev.y; })
-          .on('end', function (this: any, ev: any, d: any) { if (!ev.active) sim.alphaTarget(0.015).restart(); d.fx = null; d.fy = null; d.vx = (Math.random() - 0.5) * 7; d.vy = (Math.random() - 0.5) * 7; select(this).classed('grab', false); }) as any);
+          .on('end', function (this: any, ev: any, d: any) { if (!ev.active) sim.alphaTarget(0.02).restart(); d.fx = null; d.fy = null; d.vx = (Math.random() - 0.5) * 7; d.vy = (Math.random() - 0.5) * 7; select(this).classed('grab', false); }) as any);
         groups = enter.merge(groups as any);
       }
 
       let idx = 0;
       (function add() {
         if (stopped) return;
-        if (idx >= nodes.length) { sim.alphaTarget(0.015).restart(); return; }
+        if (idx >= nodes.length) { sim.alphaTarget(0.02).restart(); return; }
         const n = nodes[idx++];
         n.x = (Math.random() - 0.5) * 12; n.y = (Math.random() - 0.5) * 12; n.born = tcount;
         live.push(n); render();
