@@ -62,7 +62,7 @@ export default function RemoteFeedback() {
             </Link>
             <Link href="/" className="logo-dot">8</Link>
             <span className="app-head-title">気づきメモ</span>
-            <span className="badge badge-gray" style={{ fontSize: 10, padding: '3px 8px' }}>REMOTE-3</span>
+            <span className="badge badge-gray" style={{ fontSize: 10, padding: '3px 8px' }}>REMOTE-4</span>
           </div>
         </header>
 

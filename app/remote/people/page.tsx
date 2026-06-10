@@ -36,7 +36,7 @@ export default function RemotePeople() {
       </div>
 
       <div className="screen">
-        <span className="eyebrow">REMOTE · 個人の振り返り</span>
+        <span className="eyebrow">REMOTE-3 · 個人の振り返り</span>
         <h1 style={{ fontSize: 34, marginTop: 6 }}>発表する人を選んでください</h1>
         <p className="tiny muted" style={{ marginTop: 6 }}>Discord名ごとに、提出した4つの振り返りを表示します。提出した順に自動で並びます。</p>
 
