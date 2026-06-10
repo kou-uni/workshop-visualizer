@@ -48,7 +48,7 @@ export default function RemotePerson() {
           </div>
         ) : (
           <>
-            <span className="eyebrow">REMOTE · 個人の振り返り{idx >= 0 ? ` · ${idx + 1} / ${list.length}` : ''}</span>
+            <span className="eyebrow">REMOTE · 個人の振り返り</span>
             <h1 style={{ fontSize: 40, marginTop: 6 }}>{cur.discord_name}</h1>
 
             <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 16 }}>
