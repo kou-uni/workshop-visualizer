@@ -539,3 +539,9 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 
 /* 3D雲：単語は1行固定（折り返し防止） */
 .cloud3d .tagcloud--item { white-space: nowrap; }
+
+/* 3D雲：中心コア＋放射状の線（ワードの背面に重ねる） */
+.cloud-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: visible; }
+.cloud-lines .core-glow { animation: corePulse 3.4s ease-in-out infinite; }
+@keyframes corePulse { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
+.cloud3d .tagcloud--item { z-index: 1; }
