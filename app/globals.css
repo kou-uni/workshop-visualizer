@@ -601,3 +601,7 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 .as-minta { background: var(--minta); }
 .agent-summary .as-head .eyebrow { margin-left: 8px; }
 .as-text { font-size: 15px; line-height: 1.9; font-weight: 500; color: var(--fg); }
+
+/* spark/minta agent アイコンを 水色○(spark)／ピンク○(minta) に統一（全画面共通＝AgentConversation） */
+.agent.spark .avatar { background: #29b6e8; border-color: #29b6e8; color: #fff; border-radius: 50%; }
+.agent.minta .avatar { background: var(--minta); border-color: var(--minta); color: #fff; border-radius: 50%; }
