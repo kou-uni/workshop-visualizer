@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import BackButton from '@/components/BackButton';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AggregationView from '@/components/AggregationView';
 import MintaBusy from '@/components/MintaBusy';
 import type { AggregationResult } from '@/lib/types';
@@ -12,19 +12,31 @@ export default function FinalResult() {
   const [busy, setBusy] = useState(false);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [err, setErr] = useState('');
+  const busyRef = useRef(false);
 
+  // 自己修復ポーリング：保存済みの最新結果を取り続ける（投影が常に最新・通信断にも強い）
   useEffect(() => {
-    fetch('/api/aggregation?scope=merged').then((r) => r.json()).then((j) => { if (j.result) { setResult(j.result); setUpdatedAt(j.updatedAt); } }).catch(() => {});
+    let alive = true;
+    const load = () => {
+      if (busyRef.current) return;
+      fetch('/api/aggregation?scope=merged', { cache: 'no-store' })
+        .then((r) => r.json())
+        .then((j) => { if (alive && j.result) { setResult(j.result); setUpdatedAt(j.updatedAt); } })
+        .catch(() => {});
+    };
+    load();
+    const iv = setInterval(load, 8000);
+    return () => { alive = false; clearInterval(iv); };
   }, []);
 
   const run = async () => {
-    setBusy(true); setErr('');
+    setBusy(true); busyRef.current = true; setErr('');
     try {
       const res = await fetch('/api/aggregate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scope: 'merged' }) });
       const j = await res.json();
-      if (!res.ok) throw new Error(j.error || '集約に失敗しました');
+      if (!res.ok) throw new Error(typeof j.error === 'string' ? j.error : '集約に失敗しました');
       setResult(j.result); setUpdatedAt(new Date().toISOString());
-    } catch (e: any) { setErr(e.message); } finally { setBusy(false); }
+    } catch (e: any) { setErr(typeof e?.message === 'string' && e.message ? e.message : '集約に失敗しました。少し待って、もう一度お試しください。'); } finally { setBusy(false); busyRef.current = false; }
   };
 
   return (
