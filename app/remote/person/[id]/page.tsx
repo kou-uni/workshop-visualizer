@@ -29,8 +29,6 @@ export default function RemotePerson() {
 
   const idx = list.findIndex((r) => r.id === id);
   const cur = idx >= 0 ? list[idx] : null;
-  const prev = idx > 0 ? list[idx - 1] : null;
-  const next = idx >= 0 && idx < list.length - 1 ? list[idx + 1] : null;
 
   return (
     <>
@@ -65,10 +63,8 @@ export default function RemotePerson() {
               })}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, gap: 12 }}>
-              {prev ? <Link href={`/remote/person/${prev.id}`} className="btn">← {prev.discord_name}</Link> : <span />}
-              <Link href="/remote/people" className="btn">一覧へ</Link>
-              {next ? <Link href={`/remote/person/${next.id}`} className="btn">{next.discord_name} →</Link> : <span />}
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 24 }}>
+              <Link href="/remote/people" className="btn">← 一覧へ戻る</Link>
             </div>
           </>
         )}
