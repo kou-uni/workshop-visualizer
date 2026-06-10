@@ -10,9 +10,9 @@ export async function GET() {
   if (!s) return NextResponse.json({ reflections: [] });
   const { data } = await sb
     .from('reflections')
-    .select('id,discord_name,pr,stumble,hack,trouble,created_at')
+    .select('id,discord_name,pr,stumble,hack,trouble,committed_at')
     .eq('session_id', s.id)
-    .order('created_at', { ascending: true });
+    .order('committed_at', { ascending: true });
   return NextResponse.json({ reflections: data ?? [] });
 }
 
