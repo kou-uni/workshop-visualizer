@@ -606,15 +606,6 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 .agent.spark .avatar { background: #29b6e8; border-color: #29b6e8; color: #fff; border-radius: 50%; }
 .agent.minta .avatar { background: var(--minta); border-color: var(--minta); color: #fff; border-radius: 50%; }
 
-/* 左上ロゴ＆favicon：web3/AI概論のペンギン（public/logo.png を配置） */
-.logo-dot {
-  background: url('/logo.png') center / contain no-repeat !important;
-  width: 30px; height: 26px;
-  border-radius: 0 !important;
-  font-size: 0 !important;
-  color: transparent !important;
-  box-shadow: none !important;
-}
 
 /* チーム選択タイル（クール・25件並んでも整う） */
 .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(244px, 1fr)); gap: 12px; }
