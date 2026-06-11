@@ -70,9 +70,10 @@ export async function aggregate(scope: Scope, sessionId: string): Promise<Aggreg
   const userContent = inputs.join('\n').slice(0, inputCap);
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, maxRetries: 5, timeout: 50000 });
 
-  // team集約は安価なminiで多数さばく／運営集約(online/real/merged)は高品質モデルで投影品質を上げる
-  const opsModel = process.env.AGG_MODEL_OPS || 'gpt-4.1';
-  const model = scope.kind === 'team' ? 'gpt-4o-mini' : opsModel;
+  // team集約=多数（既定mini）／運営集約(online/real/merged)=高品質（既定gpt-4.1）。両方 env で差替可・不可時はminiへ自動フォールバック
+  const teamModel = process.env.AGG_MODEL_TEAM || 'gpt-5.4-nano';
+  const opsModel = process.env.AGG_MODEL_OPS || 'gpt-5.4-mini';
+  const model = scope.kind === 'team' ? teamModel : opsModel;
   const make = (m: string) => client.chat.completions.create({
     model: m,
     messages: [

@@ -188,7 +188,7 @@ function toneScore(r) {
 }
 function evidenceGrounding(r, corpus) {
   let total = 0, grounded = 0;
-  const check = (ev) => { for (const e of ev||[]) { total++; const s = (e||'').replace(/[。、！？\s]/g,'').slice(0,8); if (s && corpus.includes(s)) grounded++; } };
+  const check = (ev) => { for (const e of ev||[]) { total++; const s = (e||'').replace(/[「」『』“”‘’"'。、！？\s]/g,'').slice(0,8); if (s && corpus.includes(s)) grounded++; } };
   (r.commonStumbles||[]).forEach(x=>check(x.evidence));
   (r.hacks||[]).forEach(x=>check(x.evidence));
   (r.currentTroubles||[]).forEach(x=>check(x.evidence));

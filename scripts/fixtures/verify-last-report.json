@@ -3,14 +3,14 @@
   "burstOk": 20,
   "online": {
     "name": "オンライン全体（REMOTE-2/5）",
-    "recall": 0.9166666666666666,
+    "recall": 1,
     "stHit": 3,
     "tone": {
-      "casual": 5,
+      "casual": 8,
       "polite": 0
     },
     "ground": 1,
-    "wc": 21,
+    "wc": 20,
     "wcOk": true,
     "pass": true
   },
@@ -19,13 +19,13 @@
     "recall": 1,
     "stHit": 2,
     "tone": {
-      "casual": 5,
-      "polite": 0
+      "casual": 7,
+      "polite": 1
     },
-    "ground": 0.3684210526315789,
-    "wc": 21,
+    "ground": 0.5833333333333334,
+    "wc": 20,
     "wcOk": true,
-    "pass": true
+    "pass": false
   },
   "merged": {
     "name": "統合（最終結果）",
@@ -35,7 +35,7 @@
       "casual": 7,
       "polite": 0
     },
-    "ground": 1,
+    "ground": 0.875,
     "wc": 22,
     "wcOk": true,
     "pass": true
@@ -46,10 +46,10 @@
     "teams": 20,
     "rec": 20,
     "by": {
-      "team": 80,
-      "real": 4,
-      "merged": 4,
-      "online": 4
+      "team": 140,
+      "real": 7,
+      "merged": 7,
+      "online": 7
     },
     "sessCount": 1
   }
