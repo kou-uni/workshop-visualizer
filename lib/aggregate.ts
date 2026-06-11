@@ -69,14 +69,25 @@ export async function aggregate(scope: Scope, sessionId: string): Promise<Aggreg
   const inputCap = scope.kind === 'team' ? 16000 : 60000;
   const userContent = inputs.join('\n').slice(0, inputCap);
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, maxRetries: 5, timeout: 50000 });
-  const completion = await client.chat.completions.create({
-    model: 'gpt-4o-mini',
+
+  // team集約は安価なminiで多数さばく／運営集約(online/real/merged)は高品質モデルで投影品質を上げる
+  const opsModel = process.env.AGG_MODEL_OPS || 'gpt-4.1';
+  const model = scope.kind === 'team' ? 'gpt-4o-mini' : opsModel;
+  const make = (m: string) => client.chat.completions.create({
+    model: m,
     messages: [
       { role: 'system', content: SYSTEM_PROMPT },
       { role: 'user', content: userContent },
     ],
     response_format: { type: 'json_schema', json_schema: { name: 'aggregation', strict: true, schema: SCHEMA as any } },
   });
+  let completion;
+  try {
+    completion = await make(model);
+  } catch (e) {
+    if (model === 'gpt-4o-mini') throw e;
+    completion = await make('gpt-4o-mini'); // 上位モデルが使えない時は安全側にフォールバック
+  }
 
   const result = JSON.parse(completion.choices[0].message.content ?? '{}') as AggregationResult;
 
