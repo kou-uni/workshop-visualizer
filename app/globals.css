@@ -657,19 +657,19 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 
 /* スマホ可読性：主要テキストを一段大きく＋薄字ラベルは少し濃く（実機で読みやすく） */
 @media (max-width: 560px) {
-  /* 薄字（mono）ラベル：拡大＋濃く */
-  .eyebrow { font-size: 14px; color: var(--fg-2); }
-  .section-label { font-size: 14.5px; color: var(--fg-2); }
-  .track-head .tnum { font-size: 13.5px; color: var(--fg-2); }
-  .entry-card .et .k { font-size: 13px; color: var(--fg-2); }
-  .final-card .fc-k { font-size: 13px; color: var(--fg-2); }
-  .tiny { font-size: 14px; }
+  /* 薄字（mono）ラベル：さらに拡大＋濃く */
+  .eyebrow { font-size: 15px; color: var(--fg-2); }
+  .section-label { font-size: 15.5px; color: var(--fg-2); }
+  .track-head .tnum { font-size: 14.5px; color: var(--fg-2); }
+  .entry-card .et .k { font-size: 14px; color: var(--fg-2); }
+  .final-card .fc-k { font-size: 14px; color: var(--fg-2); }
+  .tiny { font-size: 15px; }
 
-  /* タイル上の文字を拡大 */
+  /* タイル上の文字をさらに拡大 */
   .entry-card .et .v { font-size: 20px; white-space: nowrap; }
-  .gal-card .meta .n { font-size: 17px; }
-  .gal-card .meta .d { font-size: 15px; }
-  .final-card .fc-desc { font-size: 15px; }
+  .gal-card .meta .n { font-size: 19px; }
+  .gal-card .meta .d { font-size: 16px; }
+  .final-card .fc-desc { font-size: 16px; }
 
   /* 集約・フォーム系 */
   .stat .l { font-size: 14px; }
