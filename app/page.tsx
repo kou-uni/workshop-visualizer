@@ -50,7 +50,7 @@ export default function Home() {
       <div className="gal">
         <span className="eyebrow">2026/06/11 木 · web3/AI概論 第8回振り返り会</span>
         <h1 style={{ margin: '6px 0 18px', fontSize: 28 }}>
-          これまでの取り組みを、語り合おう
+          これまでの取り組みを、<br className="sp-br" />語り合おう
         </h1>
 
         <div className="section-label">STEP1　あなたの参加形態は？</div>
