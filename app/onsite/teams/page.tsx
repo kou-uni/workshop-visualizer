@@ -29,7 +29,7 @@ export default function OnsiteTeams() {
   return (
     <>
       <div className="topbar">
-        <BackButton /><Link href="/" className="logo-dot">8</Link>
+        <BackButton href="/?to=real" /><Link href="/" className="logo-dot">8</Link>
         <span className="title">チームの振り返り</span>
         <span className="spacer" />
       </div>

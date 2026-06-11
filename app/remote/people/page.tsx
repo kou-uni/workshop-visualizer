@@ -30,7 +30,7 @@ export default function RemotePeople() {
   return (
     <>
       <div className="topbar">
-        <BackButton /><Link href="/" className="logo-dot">8</Link>
+        <BackButton href="/?to=online" /><Link href="/" className="logo-dot">8</Link>
         <span className="title">個人の振り返り</span>
         <span className="spacer" />
       </div>
