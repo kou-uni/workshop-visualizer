@@ -666,7 +666,7 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
   .tiny { font-size: 14px; }
 
   /* タイル上の文字を拡大 */
-  .entry-card .et .v { font-size: 20px; }
+  .entry-card .et .v { font-size: 20px; white-space: nowrap; }
   .gal-card .meta .n { font-size: 17px; }
   .gal-card .meta .d { font-size: 15px; }
   .final-card .fc-desc { font-size: 15px; }

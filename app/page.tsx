@@ -59,14 +59,14 @@ export default function Home() {
             <span className="ico">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
             </span>
-            <span className="et"><span className="k">REMOTE</span><span className="v">オンラインの方はこちら</span></span>
+            <span className="et"><span className="k">REMOTE</span><span className="v">オンラインの方</span></span>
             <span className="arrow">{DOWN}</span>
           </a>
           <a className="entry-card real" onClick={() => go('real', realRef)}>
             <span className="ico">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3" /></svg>
             </span>
-            <span className="et"><span className="k">ONSITE</span><span className="v">リアル会場の方はこちら</span></span>
+            <span className="et"><span className="k">ONSITE</span><span className="v">リアル会場の方</span></span>
             <span className="arrow">{DOWN}</span>
           </a>
         </div>
