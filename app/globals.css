@@ -711,3 +711,7 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
   .team-chip .ts { font-size: 12.5px; }
   .present-text { font-size: 18px; }
 }
+
+/* スマホだけ改行する <br className="sp-br" />（PCは1行・スマホで「、」改行） */
+.sp-br { display: none; }
+@media (max-width: 560px) { .sp-br { display: inline; } }

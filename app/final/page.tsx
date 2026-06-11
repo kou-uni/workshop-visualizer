@@ -53,7 +53,7 @@ export default function FinalResult() {
         <div className="screen-head">
           <div>
             <span className="eyebrow">ALL · リアル＆オンライン統合</span>
-            <h1 style={{ fontSize: 36, marginTop: 6 }}>今日の棚卸し、みんなの声</h1>
+            <h1 style={{ fontSize: 36, marginTop: 6 }}>今日の棚卸し、<br className="sp-br" />みんなの声</h1>
           </div>
           {ops && (
             <button className="btn btn-primary btn-lg" onClick={run} disabled={busy}>

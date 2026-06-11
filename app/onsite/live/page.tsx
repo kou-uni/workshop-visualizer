@@ -52,7 +52,7 @@ export default function OnsiteLive() {
         <div className="screen-head">
           <div>
             <span className="eyebrow">ONSITE-3 · 全体集計</span>
-            <h1 style={{ fontSize: 34, marginTop: 6 }}>リアル会場の声を、ひとつに</h1>
+            <h1 style={{ fontSize: 34, marginTop: 6 }}>リアル会場の声を、<br className="sp-br" />ひとつに</h1>
           </div>
           {ops && (
             <button className="btn btn-primary btn-lg" onClick={run} disabled={busy}>

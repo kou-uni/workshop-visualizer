@@ -36,7 +36,7 @@ export default function OnsiteTeams() {
 
       <div className="screen">
         <span className="eyebrow">ONSITE-2 · チームの振り返り</span>
-        <h1 style={{ fontSize: 34, marginTop: 6 }}>チームを選んでください</h1>
+        <h1 style={{ fontSize: 34, marginTop: 6 }}>振り返ったチームたち</h1>
         <p className="tiny muted" style={{ marginTop: 6 }}>各チームのAI振り返り（議論サマリ／spark &amp; minta）を見られます。提出した順に自動で並びます。</p>
 
         {loading ? (

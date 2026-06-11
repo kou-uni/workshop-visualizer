@@ -53,7 +53,7 @@ export default function RemoteAdmin() {
         <div className="screen-head">
           <div>
             <span className="eyebrow">REMOTE-5 · オンライン集約</span>
-            <h1 style={{ fontSize: 34, marginTop: 6 }}>みんなの振り返りを、ひとつに</h1>
+            <h1 style={{ fontSize: 34, marginTop: 6 }}>みんなの振り返りを、<br className="sp-br" />ひとつに</h1>
           </div>
           {ops && (
             <button className="btn btn-primary btn-lg" onClick={run} disabled={busy}>
