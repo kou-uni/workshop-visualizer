@@ -9,32 +9,35 @@ function forbidden(key: string | null) {
   return process.env.OPS_KEY && key !== process.env.OPS_KEY;
 }
 
-async function todaySessionId(sb: ReturnType<typeof supabaseAdmin>) {
-  const { data } = await sb.from('sessions').select('id').eq('date', todayJST()).order('created_at', { ascending: true }).limit(1).maybeSingle();
-  return data?.id ?? null;
+// 当日(JST)の全セッションID（重複セッションがあっても取りこぼさない）
+async function todaySessionIds(sb: ReturnType<typeof supabaseAdmin>): Promise<string[]> {
+  const { data } = await sb.from('sessions').select('id').eq('date', todayJST());
+  return (data ?? []).map((x: any) => x.id);
 }
 
-async function getCounts(sb: ReturnType<typeof supabaseAdmin>, sid: string | null) {
+async function getCounts(sb: ReturnType<typeof supabaseAdmin>, ids: string[] | null) {
   const c = async (t: string) => {
     let q = sb.from(t).select('id', { count: 'exact', head: true });
-    if (sid) q = q.eq('session_id', sid);
+    if (ids) q = q.in('session_id', ids);
     const { count } = await q;
     return count ?? 0;
   };
   let recordings = 0;
-  if (sid) {
-    const { data: teams } = await sb.from('teams').select('id').eq('session_id', sid);
-    const ids = (teams ?? []).map((x: any) => x.id);
-    if (ids.length) { const { count } = await sb.from('recordings').select('id', { count: 'exact', head: true }).in('team_id', ids); recordings = count ?? 0; }
+  if (ids) {
+    if (ids.length) {
+      const { data: teams } = await sb.from('teams').select('id').in('session_id', ids);
+      const tids = (teams ?? []).map((x: any) => x.id);
+      if (tids.length) { const { count } = await sb.from('recordings').select('id', { count: 'exact', head: true }).in('team_id', tids); recordings = count ?? 0; }
+    }
   } else {
     const { count } = await sb.from('recordings').select('id', { count: 'exact', head: true }); recordings = count ?? 0;
   }
   return {
-    reflections: await c('reflections'),
-    insights: await c('insights'),
-    teams: await c('teams'),
+    reflections: ids && !ids.length ? 0 : await c('reflections'),
+    insights: ids && !ids.length ? 0 : await c('insights'),
+    teams: ids && !ids.length ? 0 : await c('teams'),
     recordings,
-    aggregations: await c('aggregations'),
+    aggregations: ids && !ids.length ? 0 : await c('aggregations'),
   };
 }
 
@@ -44,8 +47,8 @@ export async function GET(req: Request) {
   if (forbidden(url.searchParams.get('opsKey'))) return NextResponse.json({ error: 'forbidden' }, { status: 403 });
   const target = url.searchParams.get('target') === 'all' ? 'all' : 'today';
   const sb = supabaseAdmin();
-  const sid = target === 'today' ? await todaySessionId(sb) : null;
-  return NextResponse.json({ target, sessionFound: target === 'all' || !!sid, counts: await getCounts(sb, sid) });
+  const ids = target === 'today' ? await todaySessionIds(sb) : null;
+  return NextResponse.json({ target, sessionFound: target === 'all' || (ids?.length ?? 0) > 0, counts: await getCounts(sb, ids) });
 }
 
 // クリア実行
@@ -58,21 +61,20 @@ export async function POST(req: Request) {
   if (!scope) return NextResponse.json({ error: 'scope不正' }, { status: 400 });
 
   const sb = supabaseAdmin();
-  const sid = target === 'today' ? await todaySessionId(sb) : null;
-  if (target === 'today' && !sid) return NextResponse.json({ deleted: {}, note: '当日セッションが無いため対象なし' });
+  const ids = target === 'today' ? await todaySessionIds(sb) : null; // null = 全期間
+  if (ids && ids.length === 0) return NextResponse.json({ ok: true, deleted: {}, note: '当日セッションが無いため対象なし' });
 
   const deleted: Record<string, number> = {};
   const del = async (q: any) => { const { data, error } = await q.select('id'); if (error) throw new Error(error.message); return data?.length ?? 0; };
-  // session でスコープ（当日）or 全件（neqで全マッチ）
-  const scoped = (qb: any) => (sid ? qb.eq('session_id', sid) : qb.neq('id', NONE));
+  // session でスコープ（当日=該当全セッション）or 全件（neqで全マッチ）
+  const scoped = (qb: any) => (ids ? qb.in('session_id', ids) : qb.neq('id', NONE));
 
   try {
     if (scope === 'real' || scope === 'all') {
-      // recordings は teams の子→先に消す
       const tq = sb.from('teams').select('id');
-      const { data: teams } = await (sid ? tq.eq('session_id', sid) : tq);
-      const ids = (teams ?? []).map((x: any) => x.id);
-      deleted.recordings = ids.length ? await del(sb.from('recordings').delete().in('team_id', ids)) : 0;
+      const { data: teams } = await (ids ? tq.in('session_id', ids) : tq);
+      const tids = (teams ?? []).map((x: any) => x.id);
+      deleted.recordings = tids.length ? await del(sb.from('recordings').delete().in('team_id', tids)) : 0;
       deleted.teams = await del(scoped(sb.from('teams').delete()));
     }
     if (scope === 'remote' || scope === 'all') {
