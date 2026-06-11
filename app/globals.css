@@ -184,7 +184,7 @@ h3 { font-size: 15px; font-weight: 600; }
 .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 7px; }
 .field .hint { font-size: 12px; color: var(--fg-3); font-weight: 400; }
 .input, .textarea {
-  width: 100%; font-family: var(--font); font-size: 14px; color: var(--fg);
+  width: 100%; font-family: var(--font); font-size: 16px; color: var(--fg); /* 16px未満だとiOSがタップ時に自動ズームするため16px */
   border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
   padding: 11px 13px; background: var(--bg); transition: .15s;
   resize: none;

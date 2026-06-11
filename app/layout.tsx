@@ -1,10 +1,17 @@
 import './globals.css';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
   title: 'web3・AI概論 第8回 ワークショップ',
   description: '第8回 振り返り会 — オンライン＆リアル',
   icons: { icon: '/logo.png', apple: '/logo.png', shortcut: '/logo.png' },
+};
+
+// スマホで画面にピタッと合うように（自動ズーム抑制は入力欄16pxで対応・拡大操作は許可＝アクセシビリティ維持）
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
