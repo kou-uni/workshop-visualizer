@@ -646,3 +646,11 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 .entry-card .et { display: flex; flex-direction: column; }
 .entry-card .et .k { display: block; }
 .entry-card .et .v { display: block; line-height: 1.35; }
+
+/* 管理画面：危険ボタン＆確認モーダル */
+.btn-danger { background: #d92d20; color: #fff; border-color: #d92d20; }
+.btn-danger:hover { background: #b42318; border-color: #b42318; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(20,16,12,.5); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 24px; z-index: 1000; animation: ovFade .15s ease; }
+.modal-dialog { background: #fffefb; border: 1px solid rgba(80,68,54,.12); border-radius: 18px; padding: 26px 28px; max-width: 440px; width: 100%; box-shadow: 0 30px 80px -20px rgba(0,0,0,.5); animation: dlgIn .2s cubic-bezier(.2,.8,.25,1) both; }
+@keyframes ovFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dlgIn { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
