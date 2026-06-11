@@ -685,3 +685,29 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
   .group-label { font-size: 14px; }
   .kw { font-size: 14px; }
 }
+
+/* スマホ全画面 文字底上げ（残りのクラスを一括＝全画面統一） */
+@media (max-width: 560px) {
+  h3 { font-size: 16px; }
+  .topbar .title { font-size: 15.5px; }
+  .app-head-title { font-size: 16.5px; }
+  .phase-pill { font-size: 14.5px; }
+  .field-head label { font-size: 16px; }       /* 質問見出し（1 自身のプロダクト…）*/
+  .badge { font-size: 13px; }
+  .btn { font-size: 15px; }
+  .agent .lens { font-size: 12.5px; }
+  .think { font-size: 13px; }
+  .sync { font-size: 13.5px; }
+  .synced { font-size: 13px; }
+  .macc-head .mh .t { font-size: 16px; }
+  .macc-head .mh .e { font-size: 14px; }
+  .macc-body .inner { font-size: 15px; }
+  .ask-q { font-size: 15px; }
+  .ask-reply { font-size: 15px; }
+  .agent-fold { font-size: 14px; }
+  .tt2-name { font-size: 16.5px; }
+  .tt2-meta { font-size: 12.5px; }
+  .team-chip .tn { font-size: 15px; }
+  .team-chip .ts { font-size: 12.5px; }
+  .present-text { font-size: 18px; }
+}
