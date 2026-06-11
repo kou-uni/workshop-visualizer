@@ -654,3 +654,23 @@ a.logo-dot { text-decoration: none; cursor: pointer; }
 .modal-dialog { background: #fffefb; border: 1px solid rgba(80,68,54,.12); border-radius: 18px; padding: 26px 28px; max-width: 440px; width: 100%; box-shadow: 0 30px 80px -20px rgba(0,0,0,.5); animation: dlgIn .2s cubic-bezier(.2,.8,.25,1) both; }
 @keyframes ovFade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes dlgIn { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+
+/* スマホ可読性：主要テキストを一段大きく（実機で読みやすく） */
+@media (max-width: 560px) {
+  .eyebrow { font-size: 12.5px; }
+  .tiny { font-size: 13.5px; }
+  .stat .l { font-size: 14px; }
+  .ilist .body .t { font-size: 16px; }
+  .ilist .body .e { font-size: 14px; line-height: 1.5; }
+  .ilist .count { font-size: 15px; }
+  .as-text { font-size: 17px; }
+  .agent .who { font-size: 16px; }
+  .agent .read { font-size: 17px; }
+  .agent .evidence { font-size: 13.5px; }
+  .field label { font-size: 15px; }
+  .field .hint { font-size: 13.5px; }
+  .group-label { font-size: 14px; }
+  .kw { font-size: 14px; }
+  .gal-card .meta .d { font-size: 13.5px; }
+  .gal-card .meta .n { font-size: 15.5px; }
+}
