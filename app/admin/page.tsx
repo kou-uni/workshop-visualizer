@@ -4,8 +4,13 @@ import Link from 'next/link';
 import BackButton from '@/components/BackButton';
 import { useCallback, useEffect, useState } from 'react';
 import { useOps } from '@/lib/useOps';
+import AggregationView from '@/components/AggregationView';
+import type { AggregationResult } from '@/lib/types';
 
 type Counts = { reflections: number; insights: number; teams: number; recordings: number; aggregations: number };
+type Detail = { date: string; counts: Counts; aggregations: Record<'online' | 'real' | 'merged', AggregationResult | null> };
+
+const jst = (offsetDays = 0) => new Date(Date.now() + 9 * 3600 * 1000 - offsetDays * 86400000).toISOString().slice(0, 10);
 
 const ACTIONS = [
   { scope: 'remote' as const, label: 'リモート（オンライン）をクリア', desc: '個人の振り返り・気づきメモ・オンライン/統合の集約結果を削除', tone: '' },
@@ -21,8 +26,35 @@ export default function Admin() {
   const [confirm, setConfirm] = useState<{ scope: 'remote' | 'real' | 'all'; label: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
+  // 過去データ閲覧
+  const [viewFrom, setViewFrom] = useState(jst(14));
+  const [viewTo, setViewTo] = useState(jst(0));
+  const [days, setDays] = useState<{ date: string; counts: Counts }[] | null>(null);
+  const [detail, setDetail] = useState<Detail | null>(null);
+  const [viewScope, setViewScope] = useState<'online' | 'real' | 'merged'>('online');
+  const [vbusy, setVbusy] = useState(false);
 
   useEffect(() => { setReady(true); }, []);
+
+  const loadOverview = async () => {
+    if (!ops) return;
+    setVbusy(true); setDetail(null);
+    try {
+      const r = await fetch(`/api/admin/data?opsKey=${encodeURIComponent(ops)}&from=${viewFrom}&to=${viewTo}`);
+      const j = await r.json();
+      setDays(j.days ?? []);
+    } catch { setDays([]); } finally { setVbusy(false); }
+  };
+  const loadDetail = async (date: string) => {
+    if (!ops) return;
+    setVbusy(true);
+    try {
+      const r = await fetch(`/api/admin/data?opsKey=${encodeURIComponent(ops)}&date=${date}`);
+      const j = (await r.json()) as Detail;
+      setDetail(j);
+      setViewScope((['online', 'real', 'merged'] as const).find((s) => j.aggregations?.[s]) ?? 'online');
+    } catch { /* noop */ } finally { setVbusy(false); }
+  };
 
   const loadCounts = useCallback(() => {
     if (!ops) return;
@@ -123,6 +155,50 @@ export default function Admin() {
         </div>
 
         {msg && <p className="tiny" style={{ marginTop: 16, fontWeight: 600, color: msg.startsWith('✓') ? '#067647' : '#b42318' }}>{msg}</p>}
+
+        {/* 過去データの閲覧（読み取り専用） */}
+        <div className="track-head" style={{ marginTop: 44 }}><span className="tnum">VIEW</span><h2>過去データの閲覧</h2><span className="line" /></div>
+        <div className="card" style={{ marginTop: 14, padding: '16px 18px' }}>
+          <div className="eyebrow" style={{ marginBottom: 10 }}>期間（日付レンジ）</div>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <input type="date" className="input" style={{ width: 'auto' }} value={viewFrom} onChange={(e) => setViewFrom(e.target.value)} />
+            <span className="muted">〜</span>
+            <input type="date" className="input" style={{ width: 'auto' }} value={viewTo} onChange={(e) => setViewTo(e.target.value)} />
+            <button className="btn btn-primary" disabled={vbusy} onClick={loadOverview}>{vbusy ? '読込中…' : '概要を見る'}</button>
+          </div>
+          {days && (days.length === 0 ? (
+            <p className="tiny muted" style={{ marginTop: 12 }}>この期間にデータはありません。</p>
+          ) : (
+            <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {days.map((d) => (
+                <button key={d.date} className="btn" style={{ justifyContent: 'space-between', width: '100%' }} onClick={() => loadDetail(d.date)}>
+                  <span style={{ fontWeight: 600 }}>{d.date}</span>
+                  <span className="tiny muted">個人{d.counts.reflections}・チーム{d.counts.teams}・集約{d.counts.aggregations}</span>
+                </button>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        {detail && (
+          <div className="card" style={{ marginTop: 14, padding: '18px 20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
+              <div className="eyebrow">{detail.date} の集約</div>
+              <span style={{ flex: 1 }} />
+              {(['online', 'real', 'merged'] as const).map((sc) => (
+                <button key={sc} className={`btn ${viewScope === sc ? 'btn-primary' : ''}`} disabled={!detail.aggregations[sc]} onClick={() => setViewScope(sc)}>
+                  {sc === 'online' ? 'オンライン' : sc === 'real' ? 'リアル' : '統合'}{!detail.aggregations[sc] ? '（なし）' : ''}
+                </button>
+              ))}
+            </div>
+            <p className="tiny muted">個人{detail.counts.reflections}・気づき{detail.counts.insights}・チーム{detail.counts.teams}・録音{detail.counts.recordings}・集約{detail.counts.aggregations}</p>
+            {detail.aggregations[viewScope] ? (
+              <AggregationView result={detail.aggregations[viewScope] as AggregationResult} instant />
+            ) : (
+              <p className="tiny muted" style={{ marginTop: 12 }}>このスコープの集約はありません。</p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 確認モーダル */}

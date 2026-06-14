@@ -6,7 +6,7 @@ import AgentConversation from './AgentConversation';
 import type { AggregationResult } from '@/lib/types';
 
 // 集約結果の表示（モック準拠・REMOTE-2/4・ONSITE-2/3・最終結果で共通）
-export default function AggregationView({ result }: { result: AggregationResult }) {
+export default function AggregationView({ result, instant = false }: { result: AggregationResult; instant?: boolean }) {
   return (
     <>
       <div className="stat-row" style={{ marginTop: 24 }}>
@@ -39,7 +39,7 @@ export default function AggregationView({ result }: { result: AggregationResult 
       </div>
 
       <div style={{ marginTop: 30 }}>
-        <AgentConversation result={result} autoStart simple />
+        <AgentConversation result={result} autoStart={!instant} simple instant={instant} />
       </div>
     </>
   );
